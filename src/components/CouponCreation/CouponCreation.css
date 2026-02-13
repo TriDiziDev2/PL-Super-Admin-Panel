@@ -1,0 +1,135 @@
+/* Overlay */
+.coupon-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Modal */
+.coupon-modal {
+  background: #ffffff;
+  width: 720px;
+  max-width: 95%;
+  max-height: 90vh;              /* 👈 Important */
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;        /* Header | Body | Footer */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+/* Header */
+.coupon-header {
+  padding: 22px 28px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-shrink: 0;                /* Prevent shrinking */
+}
+
+.coupon-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.coupon-header p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.close-icon {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Scrollable Body */
+.coupon-body {
+  padding: 10px 28px;
+  overflow-y: auto;              /* 👈 Scroll only body */
+  flex: 1;
+}
+
+/* Custom Scrollbar (Optional) */
+.coupon-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.coupon-body::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 6px;
+}
+
+/* Form Grid */
+.coupon-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 28px;
+}
+
+/* Form Row */
+.form-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.form-row input,
+.form-row select {
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+/* Footer */
+.coupon-footer {
+  padding: 18px 28px 22px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;               /* Prevent shrinking */
+  border-top: 1px solid #eee;
+}
+
+/* Buttons */
+.cancel-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  cursor: pointer;
+}
+
+.create-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .coupon-form {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,207 @@
+.createUserContainer{
+    padding:24px;
+    background:#f8f6f2;
+    width: 1024px;
+}
+
+.createUserHeader{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    color: #A65F00;
+    font-weight: 400;
+    background:#fff8e6;
+    border:1px solid #f1c94a;
+    padding:16px;
+    border-radius:10px;
+}
+
+.backBtn{
+    background:white;
+    padding:6px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.createuserheading{
+    color: #A65F00;
+    font-weight: 400;
+    font-size: 30px;
+}
+
+.createuserdesc{
+    color: #3F3F47;
+    font-weight: 300;
+    font-size: 16px;
+}
+
+.usercreatecategory{
+    color: #0A0A0A;
+    font-size: 20px;
+    align-items: center;
+    gap: 10px;
+    font-weight: 300;
+}
+
+.businesscategoryicon{
+    color: #E17100;
+    align-items: center;
+}
+
+.businessCard{
+    background:white;
+    border-radius:10px;
+    margin-top:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+
+.accountCard{
+    width: 342px;
+    background:white;
+    border-radius:10px;
+    padding:20px;
+    margin-top:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+
+.userInfoCard{
+    width: 608px;
+    background:white;
+    border-radius:10px;
+    padding:20px;
+    margin-top:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+
+.userinfoheader{
+    color: #717182;
+    font-size: 14px;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.cardTitle{
+    height: 82px;
+    width: auto;
+    padding: 20px;
+    background-color: #FEFCE8;
+    border: 1px solid #FEE685;
+    border-top: 14px;
+    margin-top: 26px;
+}
+
+.cardTitle1{
+    height: 82px;
+    width: auto;
+    margin-top:20px;
+}
+
+.cardTitle h3{
+    margin:0;
+}
+
+.cardTitle span{
+    color:#71717B;
+    font-size:13px;
+}
+
+.primaryLabel{
+    margin-top:15px;
+    font-size:13px;
+    color: #3F3F47;
+    font-weight: bold;
+}
+
+
+.categoryRow{
+    display:flex;
+    gap:16px;
+    margin-top:10px;
+    padding: 20px;
+}
+
+.categoryBox{
+    flex:1;
+    border:1px solid #e4e4e7;
+    border-radius:8px;
+    padding:16px;
+    color: #364153;
+    text-align:center;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    align-items:center;
+}
+
+.activeCat{
+    border:1px solid #f1b000;
+    background:#fff7d6;
+}
+
+.bottomGrid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+
+.formGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:15px;
+}
+
+.formGroup{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.userforminput{
+    color: #717182;
+    background-color: #F3F3F5;
+    height: 36px;
+}
+
+.userinfotitle{
+    color:#3F3F47;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.usercardtitle{
+    color: #0A0A0A;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.formGroup input,
+.formGroup select{
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #e4e4e7;
+}
+
+.createBtn{
+    background:#D4AF37;
+    border:none;
+    padding:10px;
+    width: 300px;
+    color: #0A0A0A;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius:6px;
+    margin:15px 12px 0 0 ;
+    cursor:pointer;
+}
+
+.cancelBtn{
+    margin-top:10px;
+    padding:10px;
+    border-radius:6px;
+    width: 300px;
+    border:1px solid #e4e4e7;
+    background:white;
+    cursor:pointer;
+}

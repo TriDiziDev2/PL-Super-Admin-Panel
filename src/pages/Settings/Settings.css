@@ -1,0 +1,285 @@
+.settingscontainer{
+    height: 1020px;
+    width: 1040px;
+}
+
+.platforminformation{
+    height: 700px;
+    width: 1040px;
+    border-radius: 14px;
+    background-color: #ffffff;
+    border: 1px solid #FEE685;
+    margin-top: 20px;
+}
+
+.platforminfoheader{
+    height: 82px;
+    width: 1038px;
+    background: linear-gradient(135deg, #FFFBEB, #FEFCE8) ;
+    border-bottom: 1px solid #FEE685;
+    padding: 20px 0 0 20px;
+    border-radius: 14px;
+}
+
+.platforminfoheader h2{
+    color: #0A0A0A;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.platforminfoheader p{
+    color: #717182;
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 16px;
+}
+
+.platforminfoinput{
+    height: 64px;
+    width: 1024px;
+    margin: 30px 0 0 20px;
+}
+
+.platforminfoinput1{
+    height: 64px;
+    width: 1024px;
+    margin: 30px 0 0 20px;
+}
+
+.platforminfoinput4{
+    height: 64px;
+    width: 1024px;
+    margin: 30px 0 0 20px;
+}
+
+.platforminfoinput2{
+    height: 64px;
+    width: 480px;
+    margin: 30px 0 0 20px;
+}
+
+.platforminfoinput3{
+    height: 64px;
+    width: 480px;
+    margin: 30px 0 0 20px;
+}
+
+.platforminfoinput h3{
+    color: #BB4D00;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.platforminfoinput1 h3{
+    color: #BB4D00;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.platforminfoinput2 h3{
+    color: #1447E6;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.platforminfoinput3 h3{
+    color: #008236;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.platforminfoinput4 h3{
+    color: #008236;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.platforminputtitle{
+    color: #008236;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.platforminfoinput2 input{
+    height: 36px;
+    width: 480px;
+    border-radius: 8px;
+    background-color: #F3F3F5;
+    color: #0A0A0A;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin-top: 12px;
+}
+
+.platforminfoinput3 input{
+    height: 36px;
+    width: 480px;
+    border-radius: 8px;
+    background-color: #F3F3F5;
+    color: #0A0A0A;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin-top: 12px;
+}
+
+.platforminfoinput4 input{
+    height: 36px;
+    width: 990px;
+    border-radius: 8px;
+    background-color: #F3F3F5;
+    color: #0A0A0A;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin-top: 12px;
+}
+
+.platforminfoinput input{
+    height: 36px;
+    width: 990px;
+    border-radius: 8px;
+    background-color: #F3F3F5;
+    color: #0A0A0A;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin-top: 12px;
+}
+
+.platformaboutinfo{
+    height: 64px;
+    width: 990px;
+    border-radius: 8px;
+    background-color: #F3F3F5;
+    color: #0A0A0A;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin-top: 12px;
+}
+
+.platformcontactinfo{
+    display: flex;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.platformcontactinfo1{
+    display: flex;
+    gap: 14px;
+}
+
+.sendreply1{
+    height: 36px;
+    width: 118px;
+    border-radius: 8px;
+    background-color: #D4AF37;
+    border-color: #D4AF37;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    padding-left: 8px;
+    gap: 8px;
+    margin: 50px 0 0 20px;
+}
+
+.sendreply2{
+    height: 36px;
+    width: 180px;
+    border-radius: 8px;
+    background-color: #D4AF37;
+    border-color: #D4AF37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    padding-left: 8px;
+    gap: 8px;
+    margin: 24px 0 0 20px;
+}
+
+.adminprofile{
+    height: 560px;
+    width: 1040px;
+    border-radius: 14px;
+    background-color: #ffffff;
+    border: 1px solid #FEE685;
+    margin-top: 20px;
+}
+
+.adminprofilehead{
+    height: 146px;
+    width: 990px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #FFFBEB, #FEFCE8);
+    border: 1px solid #FEE685;
+    display: flex;
+    padding: 16px;
+    margin: 60px 0 0 25px;
+}
+
+.adminprofilepic{
+    height: 90px;
+    width: 90px;
+    border-radius: 50%;
+    background-color: #D4AF37;
+    color: #0A0A0A;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 30px;
+    margin:10px;
+}
+
+.cameraicon{
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: #D4AF37;
+    color: #0A0A0A;
+    font-size: 18px;
+    padding: 6px;
+    margin: 6px 0 0 34px;
+}
+
+.adminprofileinfo{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin:16px 0 0 34px;
+}
+
+.adminprofileinfo h3{
+    color: #973C00;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.adminprofileinfo p{
+    color: #BB4D00;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.adminprofileinfo span{
+    width: fit-content;
+    color: #BB4D00;
+    font-size: 14px;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #FFB900;
+}
+
+.securityinfo{
+    height: 460px;
+    width: 1040px;
+    border-radius: 14px;
+    border: 1px solid #FFC9C9;
+    margin-top: 20px;
+}

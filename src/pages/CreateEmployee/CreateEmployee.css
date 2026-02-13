@@ -1,0 +1,158 @@
+.create-employee-wrapper {
+  background: #f4efe3;
+  padding: 30px;
+  width: 1040px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: linear-gradient(135deg, #FFFBEB, #FEFCE8, #FFFBEB);
+  padding: 20px;
+  border: 1px solid #FEE685;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 26px;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.page-header p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Card Sections */
+.card-section {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
+  overflow: hidden;
+}
+
+.card-section.yellow {
+  border: 2px solid #facc15;
+}
+
+.card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-header span {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Grid Layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 22px;
+}
+
+.form-grid.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full {
+  grid-column: span 3;
+}
+
+.form-group label {
+  font-size: 13px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select {
+  height: 42px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  font-size: 14px;
+  background: #f9fafb;
+}
+
+.inputtextoption{
+    color: #717182;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #facc15;
+  background: #fff;
+}
+
+/* Status Width */
+.status-width {
+  width: 250px;
+  padding: 20px;
+}
+
+/* Footer */
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn.cancel {
+  background: #e5e7eb;
+}
+
+.btn.primary {
+  background: #facc15;
+}
+
+.btn.primary:hover {
+  background: #fbbf24;
+}
