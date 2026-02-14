@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './Products.css';
 import { FaPlus } from "react-icons/fa6";
@@ -22,12 +22,7 @@ import { HiOutlineCube } from "react-icons/hi2";
 import { BsThreeDots } from "react-icons/bs";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { LiaCertificateSolid } from "react-icons/lia";
-import { FiBriefcase } from "react-icons/fi";
-import { MdShoppingCart } from "react-icons/md";
-import { LuWarehouse } from "react-icons/lu";
-import { LuLandPlot } from "react-icons/lu";
-import { LuBedDouble } from "react-icons/lu";
-import { LuUsers } from "react-icons/lu";
+import api from "../../lib/api";
 
 
 
@@ -35,872 +30,293 @@ import { LuUsers } from "react-icons/lu";
 
 
 
+
+const LISTING_TYPE_BY_TAB = {
+  marketplace: "MARKETPLACE",
+  buynow: "BUY_NOW",
+  auctions: "AUCTIONS",
+  tolet: "TO_LET",
+};
+
+const LISTING_LABEL_BY_TAB = {
+  marketplace: "Marketplace",
+  buynow: "Buy Now",
+  auctions: "Auctions",
+  tolet: "To-let",
+};
+
+const CATEGORY_LABELS = {
+  REAL_ESTATE: "Real Estate",
+  CARS: "Cars",
+  BIKES: "Bikes",
+  FURNITURE: "Furniture",
+  JEWELLERY_AND_WATCHES: "Jewellery & Watches",
+  ARTS_AND_PAINTINGS: "Arts & Paintings",
+  ANTIQUES: "Antiques",
+  COLLECTABLES: "Collectables",
+};
+
+const CATEGORY_FILTERS = [
+  { value: "ALL", label: "All Categories", icon: CiFilter },
+  { value: "REAL_ESTATE", label: "Real Estate", icon: PiBuildingOfficeBold },
+  { value: "CARS", label: "Cars", icon: LiaCarSideSolid },
+  { value: "BIKES", label: "Bikes", icon: MdDirectionsBike },
+  { value: "FURNITURE", label: "Furniture", icon: RiSofaLine },
+  { value: "JEWELLERY_AND_WATCHES", label: "Jewellery & Watches", icon: IoDiamondOutline },
+  { value: "ARTS_AND_PAINTINGS", label: "Arts & Paintings", icon: PiPaintBrushFill },
+  { value: "ANTIQUES", label: "Antiques", icon: BsStars },
+  { value: "COLLECTABLES", label: "Collectables", icon: HiOutlineCube },
+  { value: "OTHERS", label: "Others", icon: BsThreeDots },
+];
+
+const statusToLabel = (status) => {
+  if (status === "APPROVED") return "active";
+  if (status === "REJECTED") return "rejected";
+  return "inactive";
+};
+
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return "N/A";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(value));
+};
+
+const formatCount = (value) => new Intl.NumberFormat("en-IN").format(Number(value || 0));
+
+const getLocationText = (meta) => {
+  if (!meta || typeof meta !== "object") return "Location not added";
+  const location =
+    meta.location ||
+    meta.city ||
+    [meta.area, meta.city].filter(Boolean).join(", ") ||
+    meta.state ||
+    meta.address;
+  return location || "Location not added";
+};
+
+const getViews = (meta) => {
+  if (!meta || typeof meta !== "object") return 0;
+  return Number(meta.views || 0);
+};
+
+const chunkProducts = (items, size = 3) => {
+  const rows = [];
+  for (let index = 0; index < items.length; index += size) {
+    rows.push(items.slice(index, index + size));
+  }
+  return rows;
+};
 
 const Products = () => {
-
   const [selectedCat, setSelectedCat] = useState("marketplace");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  return <div className='productscontainer'>
-    <div className='producthead'>
-      <div className='productheadinfo'>
-        <h1 className='productsheader'>Product Management</h1>
-        <span className='productheaddesc'>Manage products across Marketplace, Buy Now, Auctions & To-Let</span>
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+        const response = await api.get("/api/product");
+        setProducts(response?.data?.data || []);
+      } catch (error) {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to fetch products.";
+        setErrorMessage(message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const stats = useMemo(() => {
+    const totalProducts = products.length;
+    const activeListings = products.filter((item) => item.approvalStatus === "APPROVED").length;
+    const totalViews = products.reduce((sum, item) => sum + getViews(item.meta), 0);
+    const totalValue = products.reduce((sum, item) => sum + Number(item.value || 0), 0);
+    return { totalProducts, activeListings, totalViews, totalValue };
+  }, [products]);
+
+  const visibleProducts = useMemo(() => {
+    const listingType = LISTING_TYPE_BY_TAB[selectedCat];
+    const query = search.trim().toLowerCase();
+
+    return products.filter((item) => {
+      if (item.listingType !== listingType) return false;
+      if (selectedCategoryFilter !== "ALL") {
+        if (selectedCategoryFilter === "OTHERS") {
+          if (Object.prototype.hasOwnProperty.call(CATEGORY_LABELS, item.category)) {
+            return false;
+          }
+        } else if (item.category !== selectedCategoryFilter) {
+          return false;
+        }
+      }
+      if (!query) return true;
+
+      const location = getLocationText(item.meta).toLowerCase();
+      const category = (CATEGORY_LABELS[item.category] || item.category || "").toLowerCase();
+      const title = (item.title || "").toLowerCase();
+      const value = String(item.value || "").toLowerCase();
+      return (
+        title.includes(query) ||
+        category.includes(query) ||
+        location.includes(query) ||
+        value.includes(query)
+      );
+    });
+  }, [products, search, selectedCat, selectedCategoryFilter]);
+
+  const productRows = useMemo(() => chunkProducts(visibleProducts), [visibleProducts]);
+
+  const renderFilters = () => {
+    return (
+      <ul className="categoryfilters">
+        {CATEGORY_FILTERS.map((filter) => {
+          const Icon = filter.icon;
+          const isActive = selectedCategoryFilter === filter.value;
+          return (
+            <li
+              key={filter.value}
+              className={`categoryselection ${isActive ? "active" : ""}`}
+              onClick={() => setSelectedCategoryFilter(filter.value)}
+            >
+              <Icon className="categoryicon" />
+              {filter.label}
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+
+  return (
+    <div className='productscontainer'>
+      <div className='producthead'>
+        <div className='productheadinfo'>
+          <h1 className='productsheader'>Product Management</h1>
+          <span className='productheaddesc'>Manage products across Marketplace, Buy Now, Auctions & To-Let</span>
+        </div>
+        <button className='addproduct' onClick={() => navigate("/productcreation")}><FaPlus />Add Product</button>
       </div>
-      <button className='addproduct'onClick={() => navigate("/productcreation")}><FaPlus />Add Product</button>
-    </div>
-    <ul className='producthighlights'>
-      <li className='producthighlight'>
-        <div className='producthighlightinfo'>
-          <span className='producthighlighttitle'>Total Products</span><br></br>
-          <span className='producthighlightnum'>42</span>
-        </div>
-        <div className='producthighlighticon'><IoCubeOutline /></div>
-      </li>
-      <li className='producthighlight1'>
-        <div className='producthighlightinfo'>
-          <span className='producthighlighttitle'>Active Listings</span><br></br>
-          <span className='producthighlightnum1'>42</span>
-        </div>
-        <div className='producthighlighticon1'><IoEyeOutline /></div>
-      </li>
-      <li className='producthighlight1'>
-        <div className='producthighlightinfo'>
-          <span className='producthighlighttitle'>Total Views</span><br></br>
-          <span className='producthighlightnum1'>69,310</span>
-        </div>
-        <div className='producthighlighticon2'><IoEyeOutline /></div>
-      </li>
-      <li className='producthighlight1'>
-        <div className='producthighlightinfo'>
-          <span className='producthighlighttitle'>Total Value</span><br></br>
-          <span className='producthighlightnum'>₹485Cr+</span>
-        </div>
-        <div className='producthighlighticon3'><LuCrown /></div>
-      </li>
-    </ul>
-    <div className='productcatmain'>
-    <ul className='productcat1'>
-      <li
-        className={`productcatname ${selectedCat === "marketplace" ? "active" : ""}`}
-        onClick={() => setSelectedCat("marketplace")}
-      >
-        <AiOutlineShop /> Marketplace
-      </li>
 
-      <li
-        className={`productcatname ${selectedCat === "buynow" ? "active" : ""}`}
-        onClick={() => setSelectedCat("buynow")}
-      >
-        <BsLightningCharge /> Buy Now
-      </li>
+      <ul className='producthighlights'>
+        <li className='producthighlight'>
+          <div className='producthighlightinfo'>
+            <span className='producthighlighttitle'>Total Products</span><br />
+            <span className='producthighlightnum'>{formatCount(stats.totalProducts)}</span>
+          </div>
+          <div className='producthighlighticon'><IoCubeOutline /></div>
+        </li>
+        <li className='producthighlight1'>
+          <div className='producthighlightinfo'>
+            <span className='producthighlighttitle'>Active Listings</span><br />
+            <span className='producthighlightnum1'>{formatCount(stats.activeListings)}</span>
+          </div>
+          <div className='producthighlighticon1'><IoEyeOutline /></div>
+        </li>
+        <li className='producthighlight1'>
+          <div className='producthighlightinfo'>
+            <span className='producthighlighttitle'>Total Views</span><br />
+            <span className='producthighlightnum1'>{formatCount(stats.totalViews)}</span>
+          </div>
+          <div className='producthighlighticon2'><IoEyeOutline /></div>
+        </li>
+        <li className='producthighlight1'>
+          <div className='producthighlightinfo'>
+            <span className='producthighlighttitle'>Total Value</span><br />
+            <span className='producthighlightnum'>{formatCurrency(stats.totalValue)}</span>
+          </div>
+          <div className='producthighlighticon3'><LuCrown /></div>
+        </li>
+      </ul>
 
-      <li
-        className={`productcatname ${selectedCat === "auctions" ? "active" : ""}`}
-        onClick={() => setSelectedCat("auctions")}
-      >
-        <TbHammer /> Auctions
-      </li>
+      <div className='productcatmain'>
+        <ul className='productcat1'>
+          <li className={`productcatname ${selectedCat === "marketplace" ? "active" : ""}`} onClick={() => setSelectedCat("marketplace")}><AiOutlineShop /> Marketplace</li>
+          <li className={`productcatname ${selectedCat === "buynow" ? "active" : ""}`} onClick={() => setSelectedCat("buynow")}><BsLightningCharge /> Buy Now</li>
+          <li className={`productcatname ${selectedCat === "auctions" ? "active" : ""}`} onClick={() => setSelectedCat("auctions")}><TbHammer /> Auctions</li>
+          <li className={`productcatname ${selectedCat === "tolet" ? "active" : ""}`} onClick={() => setSelectedCat("tolet")}><FiHome /> To-let</li>
+        </ul>
+      </div>
 
-      <li
-        className={`productcatname ${selectedCat === "tolet" ? "active" : ""}`}
-        onClick={() => setSelectedCat("tolet")}
-      >
-        <FiHome /> To-let
-      </li>
-    </ul>
+      <div className="below-content">
+        <div>
+          <div className="productcatmain1">
+            <FiSearch className="searchIcon1" />
+            <input
+              type="text"
+              placeholder="Search products by name, category, location, or price..."
+              className="searchInput1"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </div>
+          <div className="categoryfilter">
+            <h2 className="filterheading">Filter by Category</h2>
+            {renderFilters()}
+          </div>
+
+          <div className="categoryproducts">
+            {isLoading && <p>Loading products...</p>}
+            {!isLoading && errorMessage && <p>{errorMessage}</p>}
+            {!isLoading && !errorMessage && productRows.length === 0 && (
+              <p>No products found for this listing type.</p>
+            )}
+
+            {!isLoading && !errorMessage && productRows.map((row, rowIndex) => (
+              <div className="categoryproductrow" key={`row-${rowIndex}`}>
+                {row.map((product) => (
+                  <div
+                    className="categoryproduct"
+                    key={product.id}
+                    onClick={() => navigate("/productpage", { state: { productId: product.id } })}
+                  >
+                    <div className="producttagrow">
+                      <div className="producttagrow1">
+                        {selectedCat !== "tolet" && (
+                          <>
+                            <span className="productbusinesstag">{LISTING_LABEL_BY_TAB[selectedCat]}</span>
+                            <span className="productcattag">{CATEGORY_LABELS[product.category] || product.category}</span>
+                          </>
+                        )}
+                        {selectedCat === "tolet" && <h2 className="producattitle">{product.title}</h2>}
+                      </div>
+                      <div className="producttaggrow2"><BsThreeDotsVertical /></div>
+                    </div>
+
+                    {selectedCat !== "tolet" && <h2 className="producattitle">{product.title}</h2>}
+
+                    <span className="productcatdesc">📍 {getLocationText(product.meta)}</span>
+                    <div className="productpricetag">
+                      <h3 className="productprice">{formatCurrency(product.value)}</h3>
+                      <span className="productactivetag">{statusToLabel(product.approvalStatus)}</span>
+                    </div>
+                    <div className="productviewtag">
+                      <h3 className="productviews"><IoEyeOutline />{formatCount(getViews(product.meta))} views</h3>
+                      {product.tier === "LUXURY" && <span className="producttag1"><LuCrown />Luxury</span>}
+                      {product.tier === "CLASSIC" && <span className="producttag2"><LiaCertificateSolid />Classic</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
-    <div className="below-content">
-      {selectedCat === "marketplace" && 
-      <div>
-        <div className="productcatmain1">
-          <FiSearch className="searchIcon1" />
-            <input
-            type="text"
-            placeholder="Search products by name, category, location, or price..."
-            className="searchInput1"
-            />
-        </div>
-        <div className="categoryfilter">
-          <h2 className="filterheading">Filter by Category</h2>
-          <ul className="categoryfilters">
-            <li className="categoryselection"><CiFilter className="categoryicon" />All Categories</li>
-            <li className="categoryselection"><PiBuildingOfficeBold className="categoryicon" />Real Estate</li>
-            <li className="categoryselection"><LiaCarSideSolid className="categoryicon" />Cars</li>
-            <li className="categoryselection"><MdDirectionsBike className="categoryicon"  />Bikes</li>
-            <li className="categoryselection"><RiSofaLine className="categoryicon" />Furniture</li>
-            <li className="categoryselection"><IoDiamondOutline className="categoryicon" />Jewellery & Watches</li>
-            <li className="categoryselection"><PiPaintBrushFill className="categoryicon" />Arts & Paintings</li>
-            <li className="categoryselection"><BsStars className="categoryicon" />Antiques</li>
-            <li className="categoryselection"><HiOutlineCube className="categoryicon" />Collectables</li>
-            <li className="categoryselection"><BsThreeDots className="categoryicon" />Others</li>
-          </ul>
-        </div>
-        <div className="categoryproducts">
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Real Estate</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Luxury Sea View Villa</h2>
-                <span className="productcatdesc">📍 Juhu, Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹45Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Cars</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Rolls-Royce Phantom 2023</h2>
-                <span className="productcatdesc">📍 South Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />2,341 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Bikes</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Ducati Panigale V4R</h2>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />876 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Furniture</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Antique Rosewood Dining Set</h2>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹18L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />456 views</h3>
-                  <span className="producttag2"><LiaCertificateSolid />Classic</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Jewellery & Watches</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Patek Philippe Nautilus</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,567 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Arts & Paintings</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Contemporary Abstract Art</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.2Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />789 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Antiques</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Mughal Era Artifacts Collection</h2>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹3.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Collectables</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Rare Vintage Wine Collection</h2>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />890 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Others</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Private Yacht Charter Share</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />3,456 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-          </div>
-      </div>}
-      {selectedCat === "buynow" && <div>
-        <div className="productcatmain1">
-          <FiSearch className="searchIcon1" />
-            <input
-            type="text"
-            placeholder="Search products by name, category, location, or price..."
-            className="searchInput1"
-            />
-        </div>
-        <div className="categoryfilter">
-          <h2 className="filterheading">Filter by Category</h2>
-          <ul className="categoryfilters">
-            <li className="categoryselection"><CiFilter className="categoryicon" />All Categories</li>
-            <li className="categoryselection"><PiBuildingOfficeBold className="categoryicon" />Real Estate</li>
-            <li className="categoryselection"><LiaCarSideSolid className="categoryicon" />Cars</li>
-            <li className="categoryselection"><MdDirectionsBike className="categoryicon"  />Bikes</li>
-            <li className="categoryselection"><RiSofaLine className="categoryicon" />Furniture</li>
-            <li className="categoryselection"><IoDiamondOutline className="categoryicon" />Jewellery & Watches</li>
-            <li className="categoryselection"><PiPaintBrushFill className="categoryicon" />Arts & Paintings</li>
-            <li className="categoryselection"><BsStars className="categoryicon" />Antiques</li>
-            <li className="categoryselection"><HiOutlineCube className="categoryicon" />Collectables</li>
-            <li className="categoryselection"><BsThreeDots className="categoryicon" />Others</li>
-          </ul>
-        </div>
-        <div className="categoryproducts">
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Real Estate</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Luxury Sea View Villa</h2>
-                <span className="productcatdesc">📍 Juhu, Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹45Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Cars</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Rolls-Royce Phantom 2023</h2>
-                <span className="productcatdesc">📍 South Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />2,341 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Bikes</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Ducati Panigale V4R</h2>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />876 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Furniture</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Antique Rosewood Dining Set</h2>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹18L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />456 views</h3>
-                  <span className="producttag2"><LiaCertificateSolid />Classic</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Jewellery & Watches</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Patek Philippe Nautilus</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,567 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Arts & Paintings</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Contemporary Abstract Art</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.2Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />789 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Antiques</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Mughal Era Artifacts Collection</h2>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹3.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Collectables</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Rare Vintage Wine Collection</h2>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />890 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Others</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Private Yacht Charter Share</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />3,456 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-          </div>
-      </div>}
-      {selectedCat === "auctions" && <div>
-        <div className="productcatmain1">
-          <FiSearch className="searchIcon1" />
-            <input
-            type="text"
-            placeholder="Search products by name, category, location, or price..."
-            className="searchInput1"
-            />
-        </div>
-        <div className="categoryfilter">
-          <h2 className="filterheading">Filter by Category</h2>
-          <ul className="categoryfilters">
-            <li className="categoryselection"><CiFilter className="categoryicon" />All Categories</li>
-            <li className="categoryselection"><PiBuildingOfficeBold className="categoryicon" />Real Estate</li>
-            <li className="categoryselection"><LiaCarSideSolid className="categoryicon" />Cars</li>
-            <li className="categoryselection"><MdDirectionsBike className="categoryicon"  />Bikes</li>
-            <li className="categoryselection"><RiSofaLine className="categoryicon" />Furniture</li>
-            <li className="categoryselection"><IoDiamondOutline className="categoryicon" />Jewellery & Watches</li>
-            <li className="categoryselection"><PiPaintBrushFill className="categoryicon" />Arts & Paintings</li>
-            <li className="categoryselection"><BsStars className="categoryicon" />Antiques</li>
-            <li className="categoryselection"><HiOutlineCube className="categoryicon" />Collectables</li>
-            <li className="categoryselection"><BsThreeDots className="categoryicon" />Others</li>
-          </ul>
-        </div>
-        <div className="categoryproducts">
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Real Estate</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Luxury Sea View Villa</h2>
-                <span className="productcatdesc">📍 Juhu, Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹45Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Cars</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Rolls-Royce Phantom 2023</h2>
-                <span className="productcatdesc">📍 South Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />2,341 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Bikes</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Ducati Panigale V4R</h2>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />876 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Furniture</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Antique Rosewood Dining Set</h2>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹18L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />456 views</h3>
-                  <span className="producttag2"><LiaCertificateSolid />Classic</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Jewellery & Watches</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Patek Philippe Nautilus</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,567 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Arts & Paintings</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Contemporary Abstract Art</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.2Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />789 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Antiques</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Mughal Era Artifacts Collection</h2>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹3.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Collectables</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Rare Vintage Wine Collection</h2>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />890 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <span className="productbusinesstag">Marketplace</span>
-                    <span className="productcattag">Others</span>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <h2 className="producattitle">Private Yacht Charter Share</h2>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />3,456 views</h3>
-                  <span className="producttag1"><LuCrown />Luxury</span>
-                </div>
-              </div>
-            </div>
-          </div>
-      </div>}
-      {selectedCat === "tolet" && <div>
-        <div className="productcatmain1">
-          <FiSearch className="searchIcon1" />
-            <input
-            type="text"
-            placeholder="Search products by name, category, location, or price..."
-            className="searchInput1"
-            />
-        </div>
-        <div className="categoryfilter">
-          <h2 className="filterheading">Filter by Category</h2>
-          <ul className="categoryfilters">
-            <li className="categoryselection1"><PiBuildingOfficeBold className="categoryicon" />Residential</li>
-            <li className="categoryselection1"><FiBriefcase className="categoryicon" />Office Spaces</li>
-            <li className="categoryselection1"><MdShoppingCart  className="categoryicon" />Shops</li>
-            <li className="categoryselection1"><LuWarehouse  className="categoryicon"  />Godowns & Warehouses</li>
-            <li className="categoryselection1"><LuLandPlot  className="categoryicon" />Open Plots</li>
-            <li className="categoryselection1"><LuBedDouble  className="categoryicon" />PG & Hostels</li>
-            <li className="categoryselection1"><LuUsers  className="categoryicon" />Luxury CoLiving</li>
-            <li className="categoryselection1"><BsThreeDots className="categoryicon" />Others</li>
-          </ul>
-        </div>
-        <div className="categoryproducts">
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Luxury Sea View Villa</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Juhu, Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹45Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Rolls-Royce Phantom 2023</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 South Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />2,341 views</h3>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Ducati Panigale V4R</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />876 views</h3>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Antique Rosewood Dining Set</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹18L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />456 views</h3>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Patek Philippe Nautilus</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹58L</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,567 views</h3>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Contemporary Abstract Art</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.2Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />789 views</h3>
-                </div>
-              </div>
-            </div>
-            <div className="categoryproductrow">
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Mughal Era Artifacts Collection</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Delhi</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹3.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />1,234 views</h3>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Rare Vintage Wine Collection</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Bangalore</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹1.5Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />890 views</h3>
-                </div>
-              </div>
-              <div className="categoryproduct" onClick={() => navigate("/Productpage")}>
-                <div className="producttagrow">
-                  <div className="producttagrow1">
-                    <h2 className="producattitle">Private Yacht Charter Share</h2>
-                  </div>
-                  <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                </div>
-                <span className="productcatdesc">📍 Mumbai</span>
-                <div className="productpricetag">
-                  <h3 className="productprice">₹12Cr</h3>
-                  <span className="productactivetag">active</span>
-                </div>
-                <div className="productviewtag">
-                  <h3 className="productviews"><IoEyeOutline />3,456 views</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-      </div>}
-    </div>
-  </div>
+  );
 };
 
 export default Products;

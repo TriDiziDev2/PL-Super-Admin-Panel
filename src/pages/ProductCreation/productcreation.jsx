@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRef } from "react";
-
+import api from "../../../src/lib/api";
 import './productcreation.css';
 import { BiLeftArrowAlt } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
@@ -31,14 +31,269 @@ import { LuUsers } from "react-icons/lu";
 const ProductCreation = () => {
 
   const fileInputRef = useRef(null);
+  const marketplacePreviewsRef = useRef([]);
+  const selectedMarketplaceFilesRef = useRef([]);
+  const marketplaceFormRef = useRef(null);
+  const marketplaceTitleRef = useRef(null);
+  const marketplaceDescriptionRef = useRef(null);
+  const marketplaceValueRef = useRef(null);
+  const marketplaceStatusRef = useRef(null);
+  const marketplaceTierRef = useRef(null);
+  const [selectedMarketplaceFiles, setSelectedMarketplaceFiles] = useState([]);
+  const [marketplaceFilePreviews, setMarketplaceFilePreviews] = useState([]);
+  const [isMarketplaceSubmitting, setIsMarketplaceSubmitting] = useState(false);
 
   const handleIconClick = () => { fileInputRef.current.click(); };
 
-  const handleFileChange = (event) => { const files = event.target.files; console.log(files); };
+  const handleFileChange = (event) => {
+    const incomingFiles = Array.from(event.target.files || []);
+    if (incomingFiles.length === 0) return;
+
+    const currentFiles = selectedMarketplaceFilesRef.current;
+    const seen = new Set(
+      currentFiles.map((file) => `${file.name}-${file.size}-${file.lastModified}`),
+    );
+    const newUniqueFiles = incomingFiles.filter((file) => {
+      const key = `${file.name}-${file.size}-${file.lastModified}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    if (newUniqueFiles.length === 0) {
+      event.target.value = "";
+      return;
+    }
+
+    const nextFiles = [...currentFiles, ...newUniqueFiles];
+    selectedMarketplaceFilesRef.current = nextFiles;
+    setSelectedMarketplaceFiles(nextFiles);
+
+    const nextPreviews = [
+      ...marketplacePreviewsRef.current,
+      ...newUniqueFiles.map((file) => ({
+        name: file.name,
+        isVideo: file.type.startsWith("video/"),
+        url: URL.createObjectURL(file),
+      })),
+    ];
+    marketplacePreviewsRef.current = nextPreviews;
+    setMarketplaceFilePreviews(nextPreviews);
+
+    // Allow selecting the same file again after removal/clear.
+    event.target.value = "";
+  };
 
     const [activeTab, setActiveTab] = useState("realestate");
     const [listingMode, setListingMode] = useState("marketplace");
     const navigate = useNavigate();
+
+    React.useEffect(() => {
+      marketplacePreviewsRef.current = marketplaceFilePreviews;
+    }, [marketplaceFilePreviews]);
+
+    React.useEffect(() => {
+      selectedMarketplaceFilesRef.current = selectedMarketplaceFiles;
+    }, [selectedMarketplaceFiles]);
+
+    React.useEffect(() => () => {
+      marketplacePreviewsRef.current.forEach((item) => URL.revokeObjectURL(item.url));
+    }, []);
+
+    const categoryByTab = {
+      realestate: "REAL_ESTATE",
+      cars: "CARS",
+      bikes: "BIKES",
+      furniture: "FURNITURE",
+      jewellery: "JEWELLERY_AND_WATCHES",
+      arts: "ARTS_AND_PAINTINGS",
+      antiques: "ANTIQUES",
+      collectables: "COLLECTABLES",
+    };
+
+    const normalizeMetaKey = (label) =>
+      label
+        .replace(/[^\w\s]/g, " ")
+        .trim()
+        .split(/\s+/)
+        .map((part, index) =>
+          index === 0
+            ? part.toLowerCase()
+            : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase(),
+        )
+        .join("");
+
+    const getFieldLabel = (element) => {
+      const wrapper = element.closest(".basicinfoinputdiv");
+      const wrapperTitle = wrapper?.querySelector(".basicinfotitle")?.textContent?.trim();
+      if (wrapperTitle) return wrapperTitle;
+
+      const container = element.parentElement;
+      if (!container) return "";
+      const headings = Array.from(container.children).filter((child) =>
+        child.classList?.contains("basicinfotitle"),
+      );
+      const elementIndex = Array.from(container.children).indexOf(element);
+      let nearestHeading = "";
+      for (const heading of headings) {
+        if (Array.from(container.children).indexOf(heading) < elementIndex) {
+          nearestHeading = heading.textContent?.trim() || "";
+        }
+      }
+      return nearestHeading;
+    };
+
+    const collectMarketplaceMeta = () => {
+      const formRoot = marketplaceFormRef.current;
+      if (!formRoot) return {};
+
+      const elements = Array.from(
+        formRoot.querySelectorAll("input, select, textarea"),
+      );
+      const meta = {};
+
+      for (const element of elements) {
+        if (element === marketplaceTitleRef.current) continue;
+        if (element === marketplaceDescriptionRef.current) continue;
+        if (element === marketplaceValueRef.current) continue;
+        if (element === marketplaceStatusRef.current) continue;
+        if (element === marketplaceTierRef.current) continue;
+        if (element.type === "file") continue;
+        if (!element.value?.trim()) continue;
+
+        const rawLabel = getFieldLabel(element) || element.placeholder || element.name;
+        if (!rawLabel) continue;
+        let key = normalizeMetaKey(rawLabel);
+        if (!key) continue;
+
+        if (meta[key] !== undefined) {
+          let suffix = 2;
+          while (meta[`${key}${suffix}`] !== undefined) suffix += 1;
+          key = `${key}${suffix}`;
+        }
+        meta[key] = element.value.trim();
+      }
+
+      return meta;
+    };
+
+    const buildMediaKey = (file, productId) => {
+      const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+      const safeName = file.name
+        .replace(/\.[^.]+$/, "")
+        .replace(/[^a-zA-Z0-9_-]/g, "-")
+        .slice(0, 50);
+      return `products/${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}-${safeName}.${ext}`;
+    };
+
+    const uploadFileWithPresignedUrl = async (file, productId) => {
+      const key = buildMediaKey(file, productId);
+      const presignedResponse = await api.get("/api/media/presigned", {
+        params: { key },
+      });
+      const uploadUrl = presignedResponse?.data?.data?.url;
+      const returnedKey = presignedResponse?.data?.data?.key || key;
+      if (!uploadUrl) {
+        throw new Error("Presigned URL missing from response");
+      }
+
+      const uploadResult = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type || "application/octet-stream",
+        },
+        body: file,
+      });
+
+      if (!uploadResult.ok) {
+        throw new Error(`File upload failed for ${file.name}`);
+      }
+
+      return returnedKey;
+    };
+
+    const handleMarketplaceCreate = async () => {
+      if (listingMode !== "marketplace" || isMarketplaceSubmitting) return;
+
+      const title = marketplaceTitleRef.current?.value?.trim();
+      const description = marketplaceDescriptionRef.current?.value?.trim();
+      const rawValue = marketplaceValueRef.current?.value?.trim();
+      const status = marketplaceStatusRef.current?.value || "ACTIVE";
+      const tier = marketplaceTierRef.current?.value || "GENERAL";
+      const category = categoryByTab[activeTab];
+      const parsedValue = rawValue ? Number.parseInt(rawValue, 10) : undefined;
+
+      if (!title) {
+        alert("Title is required.");
+        return;
+      }
+
+      if (rawValue && Number.isNaN(parsedValue)) {
+        alert("Value must contain numbers only.");
+        return;
+      }
+
+      if (!category) {
+        alert("Selected category is not supported for marketplace yet.");
+        return;
+      }
+
+      try {
+        setIsMarketplaceSubmitting(true);
+
+        const createPayload = {
+          title,
+          description: description || undefined,
+          listingType: "MARKETPLACE",
+          category,
+          tier,
+          approveNow: status === "ACTIVE",
+          value: parsedValue,
+          meta: JSON.stringify(collectMarketplaceMeta()),
+        };
+
+        const createdProductResponse = await api.post("/api/product", createPayload);
+        const productId = createdProductResponse?.data?.data?.id;
+
+        if (!productId) {
+          throw new Error("Product ID missing after creation");
+        }
+
+        if (selectedMarketplaceFiles.length > 0) {
+          const uploadedKeys = [];
+          for (const file of selectedMarketplaceFiles) {
+            // Upload sequentially to keep the flow deterministic and easy to retry.
+            const key = await uploadFileWithPresignedUrl(file, productId);
+            uploadedKeys.push(key);
+          }
+
+          if (uploadedKeys.length > 0) {
+            await api.patch(`/api/product/${productId}/media`, {
+              media: uploadedKeys,
+            });
+          }
+        }
+
+        alert("Marketplace product created successfully.");
+        setMarketplaceFilePreviews((current) => {
+          current.forEach((item) => URL.revokeObjectURL(item.url));
+          return [];
+        });
+        setSelectedMarketplaceFiles([]);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        navigate("/products");
+      } catch (error) {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create marketplace product.";
+        alert(message);
+      } finally {
+        setIsMarketplaceSubmitting(false);
+      }
+    };
 
   return ( <div className='productcontainer1'>
     <div className='producthead1'>
@@ -203,7 +458,7 @@ const ProductCreation = () => {
 
 
     </div>
-    {listingMode === "marketplace" && <div>
+    {listingMode === "marketplace" && <div ref={marketplaceFormRef}>
     <div className="categoryfilter1">
         <div className='categoryselctionheader1'>
             <div className='productcategoryselector'><AiOutlineShop /></div>
@@ -288,12 +543,32 @@ const ProductCreation = () => {
                 <li className='selectedcatdesc'>PNG, JPG, MP4 up to 10MB • Maximum 10 files</li>
         </ul>
         <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.mp4" onChange={handleFileChange}/>
+        {marketplaceFilePreviews.length > 0 && (
+          <div className="basicinforow marketplacePreviewsRow">
+            {marketplaceFilePreviews.map((file) => (
+              <div className='basicinfoinputdiv marketplacePreviewItem' key={file.url}>
+                {file.isVideo ? (
+                  <video src={file.url} controls style={{ width: "180px", maxHeight: "140px", borderRadius: "8px" }} />
+                ) : (
+                  <img src={file.url} alt={file.name} style={{ width: "180px", maxHeight: "140px", objectFit: "cover", borderRadius: "8px" }} />
+                )}
+                <span className='selectedcatdesc'>{file.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
         <h3 className='basicinfotitle'>Title</h3>
-        <input type="text" placeholder="e.g., Luxury 4BHK Penthouse in South Mumbai" className="basicinfoinput" />
+        <input ref={marketplaceTitleRef} type="text" placeholder="e.g., Luxury 4BHK Penthouse in South Mumbai" className="basicinfoinput" />
         <div className='basicinforow'>
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Title</h3>
-                <input type="text" placeholder="e.g., 5,50,00,000" className="basicinfoinput1" />
+                <h3 className='basicinfotitle'>Value</h3>
+                <input
+                  ref={marketplaceValueRef}
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="e.g., 55000000"
+                  className="basicinfoinput1"
+                />
             </div>
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>City</h3>
@@ -301,7 +576,24 @@ const ProductCreation = () => {
             </div>
         </div>
         <h3 className='basicinfotitle'>Description</h3>
-        <input type="text" placeholder="Provide a detailed description of the product..." className="basicinfoinput" />
+        <input ref={marketplaceDescriptionRef} type="text" placeholder="Provide a detailed description of the product..." className="basicinfoinput" />
+        <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Status</h3>
+                <select ref={marketplaceStatusRef} defaultValue="ACTIVE" className="basicinfoinput2">
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Tier</h3>
+                <select ref={marketplaceTierRef} defaultValue="GENERAL" className="basicinfoinput2">
+                    <option value="GENERAL">General</option>
+                    <option value="LUXURY">Luxury</option>
+                    <option value="CLASSIC">Classic</option>
+                </select>
+            </div>
+        </div>
     </div>
     {activeTab === "realestate" &&
         <div className='basiccatinputs'>
@@ -957,9 +1249,16 @@ const ProductCreation = () => {
         </div>
     </div>}
     <div className='formsubmissiontags'>
-        <span>Status:</span>
-        <input type="text" placeholder="Active" className="basicinfoinput3" />
-        <button className='submittbutton'>Create Product</button>
+        <button className='submittbutton' onClick={handleMarketplaceCreate} disabled={isMarketplaceSubmitting}>
+          {isMarketplaceSubmitting ? (
+            <>
+              <span className="buttonspinner" />
+              Creating...
+            </>
+          ) : (
+            "Create Product"
+          )}
+        </button>
         <button className='cancelbutton'>Cancel</button>
     </div>
     </div>}
@@ -1717,8 +2016,6 @@ const ProductCreation = () => {
         </div>
     </div>}
     <div className='formsubmissiontags'>
-        <span>Status:</span>
-        <input type="text" placeholder="Active" className="basicinfoinput3" />
         <button className='submittbutton'>Create Product</button>
         <button className='cancelbutton'>Cancel</button>
     </div>
@@ -2477,8 +2774,6 @@ const ProductCreation = () => {
         </div>
     </div>}
     <div className='formsubmissiontags'>
-        <span>Status:</span>
-        <input type="text" placeholder="Active" className="basicinfoinput3" />
         <button className='submittbutton'>Create Product</button>
         <button className='cancelbutton'>Cancel</button>
     </div>
@@ -2880,8 +3175,6 @@ const ProductCreation = () => {
     </div>
     }
     <div className='formsubmissiontags'>
-        <span>Status:</span>
-        <input type="text" placeholder="Active" className="basicinfoinput3" />
         <button className='submittbutton'>Create Product</button>
         <button className='cancelbutton'>Cancel</button>
     </div>

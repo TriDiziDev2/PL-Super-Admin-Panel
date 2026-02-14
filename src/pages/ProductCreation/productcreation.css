@@ -1,5 +1,6 @@
 .productcontainer1{
-    height: 1900px;
+    min-height: 1900px;
+    height: auto;
     width: auto;
     margin: 0;
     padding: 14px;
@@ -245,13 +246,14 @@
 }
 
 .basicinfoform{
-    height: 588px;
+    min-height: 588px;
+    height: auto;
     width: 1014px;
     border-radius: 14px;
     box-shadow: inset 0 0 0 1.25px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
     margin-top: 16px;
-    padding: 18px 0 0 26px;
+    padding: 18px 0 24px 26px;
 }
 
 .basicinfotitle{
@@ -351,6 +353,16 @@
     gap: 20px;
 }
 
+.marketplacePreviewsRow{
+    margin-top: 12px;
+    flex-wrap: wrap;
+    row-gap: 12px;
+}
+
+.marketplacePreviewItem{
+    width: 180px;
+}
+
 .basicinfoinputdiv{
     gap: 12px;
 }
@@ -418,13 +430,30 @@
 .submittbutton{
     background-color: #D4AF37;
     color: #0A0A0A;
+    display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     padding: 10px;
     font-size: 12px;
     border-radius: 8px;
     border-color: #D4AF37;
     margin-left: 10px;
+}
+
+.buttonspinner{
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(10, 10, 10, 0.25);
+    border-top-color: #0A0A0A;
+    border-radius: 999px;
+    animation: buttonspin 0.8s linear infinite;
+}
+
+@keyframes buttonspin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .cancelbutton{
