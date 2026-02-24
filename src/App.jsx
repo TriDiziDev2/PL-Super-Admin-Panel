@@ -10,25 +10,23 @@ import Enquiries from './pages/Enquiries/Enquiries';
 import Settings from './pages/Settings/Settings';
 import Activity from './pages/ActivityCenter/Activity';
 import ProductCreation from './pages/ProductCreation/productcreation';
-import ProductPage from "./pages/ProductPage/ProductPage";
-import CreateNewUser from "./pages/CreateNewUser/CreateNewUser";
-import UserProfile from "./pages/UserProfile/UserProfile";
-import LeadDetails from "./pages/LeadDetails/LeadDetails";
-import AddLead from "./pages/AddLead/AddLead";
-import EmployeeDetails from "./pages/EmployeeDetails/EmployeeDetails";
-import CreateEmployee from "./pages/CreateEmployee/CreateEmployee";
-import EnquiryDetails from "./pages/EnquiryDetails/EnquiryDetails";
-
-
-
-
+import ProductPage from './pages/ProductPage/ProductPage';
+import CreateNewUser from './pages/CreateNewUser/CreateNewUser';
+import UserProfile from './pages/UserProfile/UserProfile';
+import LeadDetails from './pages/LeadDetails/LeadDetails';
+import AddLead from './pages/AddLead/AddLead';
+import EmployeeDetails from './pages/EmployeeDetails/EmployeeDetails';
+import CreateEmployee from './pages/CreateEmployee/CreateEmployee';
+import EnquiryDetails from './pages/EnquiryDetails/EnquiryDetails';
+import EmployeeDashboard from './pages/EmloyeeDashboard/EmployeeDashboard';
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<LandingPage />}>
-          <Route index element={<DashboardPage />} />
+          <Route index element={<EmployeeDashboard />} />
+          <Route path='dashboard' element={<DashboardPage />} />
           <Route path='products' element={<Products />} />
           <Route path='users' element={<Users />} />
           <Route path='activity' element={<Activity />} />
@@ -37,16 +35,15 @@ const App = () => {
           <Route path='financials' element={<Financials />} />
           <Route path='enquiries' element={<Enquiries />} />
           <Route path='settings' element={<Settings />} />
-          <Route path='productcreation' element={<ProductCreation/>} />
-          <Route path='productpage' element={<ProductPage/>} />
-          <Route path="create-user" element={<CreateNewUser />} />
-          <Route path="userprofile" element={<UserProfile />} />
-          <Route path='leaddetails' element={ <LeadDetails /> } />
-          <Route path="/addlead" element={<AddLead />} />
-          <Route path="/employeedetails" element={<EmployeeDetails />} />
-          <Route path="/createemployee" element={<CreateEmployee />} />
-          <Route path="/enquirydetails" element={<EnquiryDetails />} />
-
+          <Route path='productcreation' element={<ProductCreation />} />
+          <Route path='productpage' element={<ProductPage />} />
+          <Route path='create-user' element={<CreateNewUser />} />
+          <Route path='userprofile' element={<UserProfile />} />
+          <Route path='leaddetails' element={<LeadDetails />} />
+          <Route path='/addlead' element={<AddLead />} />
+          <Route path='/employeedetails' element={<EmployeeDetails />} />
+          <Route path='/createemployee' element={<CreateEmployee />} />
+          <Route path='/enquirydetails' element={<EnquiryDetails />} />
         </Route>
       </Routes>
     </BrowserRouter>

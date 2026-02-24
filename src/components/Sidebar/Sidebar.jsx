@@ -14,17 +14,16 @@ import { LuDollarSign } from 'react-icons/lu';
 import { LuMessageSquare } from 'react-icons/lu';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { MdLogout } from 'react-icons/md';
-import { FiActivity } from "react-icons/fi";
-
+import { FiActivity } from 'react-icons/fi';
 
 const linksData = [
   {
     id: 1,
     icon: <LuLayoutDashboard />,
     title: 'Dashboard',
-    link: '/',
+    link: 'dashboard',
   },
-   {
+  {
     id: 2,
     icon: <FiActivity />,
     title: 'Activity Center',
@@ -75,9 +74,7 @@ const linksData = [
 ];
 
 const Sidebar = () => {
-  const [activeLink, setActiveLink] = useState(
-    linksData[0].title.toLowerCase(),
-  );
+  const [activeLink, setActiveLink] = useState('');
 
   return (
     <div className='sidebar-container'>
