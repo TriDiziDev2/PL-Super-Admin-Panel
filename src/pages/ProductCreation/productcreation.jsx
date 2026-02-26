@@ -540,9 +540,9 @@ const ProductCreation = () => {
         <ul className='selectedcategory2'>
                 <li className='selectedcaticon2' onClick={handleIconClick} style={{ cursor: "pointer" }}><FiUpload /></li>
                 <li className='selectedcatname1'>Click to upload or drag and drop</li>
-                <li className='selectedcatdesc'>PNG, JPG, MP4 up to 10MB • Maximum 10 files</li>
+                <li className='selectedcatdesc'>PNG, JPG, WEBP, MP4 up to 10MB • Maximum 10 files</li>
         </ul>
-        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.mp4" onChange={handleFileChange}/>
+        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.webp,.mp4" onChange={handleFileChange}/>
         {marketplaceFilePreviews.length > 0 && (
           <div className="basicinforow marketplacePreviewsRow">
             {marketplaceFilePreviews.map((file) => (
@@ -1344,9 +1344,9 @@ const ProductCreation = () => {
         <ul className='selectedcategory2'>
                 <li className='selectedcaticon2' onClick={handleIconClick} style={{ cursor: "pointer" }}><FiUpload /></li>
                 <li className='selectedcatname1'>Click to upload or drag and drop</li>
-                <li className='selectedcatdesc'>PNG, JPG, MP4 up to 10MB • Maximum 10 files</li>
+                <li className='selectedcatdesc'>PNG, JPG, WEBP, MP4 up to 10MB • Maximum 10 files</li>
         </ul>
-        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.mp4" onChange={handleFileChange}/>
+        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.webp,.mp4" onChange={handleFileChange}/>
         <h3 className='basicinfotitle'>Title</h3>
         <input type="text" placeholder="e.g., Luxury 4BHK Penthouse in South Mumbai" className="basicinfoinput" />
         <div className='basicinforow'>
@@ -2102,9 +2102,9 @@ const ProductCreation = () => {
         <ul className='selectedcategory2'>
                 <li className='selectedcaticon2'onClick={handleIconClick} style={{ cursor: "pointer" }}><FiUpload /></li>
                 <li className='selectedcatname1'>Click to upload or drag and drop</li>
-                <li className='selectedcatdesc'>PNG, JPG, MP4 up to 10MB • Maximum 10 files</li>
+                <li className='selectedcatdesc'>PNG, JPG, WEBP, MP4 up to 10MB • Maximum 10 files</li>
         </ul>
-        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.mp4" onChange={handleFileChange}/>
+        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.webp,.mp4" onChange={handleFileChange}/>
         <h3 className='basicinfotitle'>Title</h3>
         <input type="text" placeholder="e.g., Luxury 4BHK Penthouse in South Mumbai" className="basicinfoinput" />
         <div className='basicinforow'>
@@ -2852,9 +2852,9 @@ const ProductCreation = () => {
         <ul className='selectedcategory2'>
                 <li className='selectedcaticon2'onClick={handleIconClick} style={{ cursor: "pointer" }}><FiUpload /></li>
                 <li className='selectedcatname1'>Click to upload or drag and drop</li>
-                <li className='selectedcatdesc'>PNG, JPG, MP4 up to 10MB • Maximum 10 files</li>
+                <li className='selectedcatdesc'>PNG, JPG, WEBP, MP4 up to 10MB • Maximum 10 files</li>
         </ul>
-        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.mp4" onChange={handleFileChange}/>
+        <input type="file" ref={fileInputRef} style={{ display: "none" }} multiple accept=".png,.jpg,.jpeg,.webp,.mp4" onChange={handleFileChange}/>
         <h3 className='basicinfotitle'>Title</h3>
         <input type="text" placeholder="e.g., Luxury 4BHK Penthouse in South Mumbai" className="basicinfoinput" />
         <div className='basicinforow'>

@@ -281,7 +281,7 @@ const Products = () => {
                   <div
                     className="categoryproduct"
                     key={product.id}
-                    onClick={() => navigate("/productpage", { state: { productId: product.id } })}
+                    onClick={() => navigate(`/productpage/${product.id}`)}
                   >
                     <div className="producttagrow">
                       <div className="producttagrow1">

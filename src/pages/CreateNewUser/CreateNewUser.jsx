@@ -6,11 +6,54 @@ import { TbHammer } from "react-icons/tb";
 import { FiHome } from "react-icons/fi";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createUser } from "../../lib/users";
 
 const CreateNewUser = () => {
 
   const [category, setCategory] = useState("marketplace");
   const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    city: "",
+    state: "",
+    isActive: true,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "isActive") setForm((f) => ({ ...f, isActive: value === "Active" }));
+    else setForm((f) => ({ ...f, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    if (!form.name?.trim() || !form.email?.trim() || !form.password?.trim()) {
+      setError("Name, email and password are required.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await createUser({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        phone: form.phone?.trim() || undefined,
+        city: form.city?.trim() || undefined,
+        state: form.state?.trim() || undefined,
+      });
+      navigate("/users");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to create user.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="createUserContainer">
@@ -78,37 +121,37 @@ const CreateNewUser = () => {
             <span className="userinfoheader">Enter the basic details of the user</span>
           </div>
 
+          {error && <p className="createUserError">{error}</p>}
           <div className="formGroup">
               <label className="userinfotitle">Full Name</label>
-              <input className="userforminput" placeholder="e.g., Priya Sharma"/>
+              <input name="name" className="userforminput" placeholder="e.g., Priya Sharma" value={form.name} onChange={handleChange}/>
             </div>
 
           <div className="formGrid">
 
             <div className="formGroup">
               <label className="userinfotitle">Email Address</label>
-              <input className="userforminput" placeholder="e.g., priya@example.com"/>
+              <input name="email" type="email" className="userforminput" placeholder="e.g., priya@example.com" value={form.email} onChange={handleChange}/>
+            </div>
+
+            <div className="formGroup">
+              <label className="userinfotitle">Password</label>
+              <input name="password" type="password" className="userforminput" placeholder="Set a password" value={form.password} onChange={handleChange}/>
             </div>
 
             <div className="formGroup">
               <label className="userinfotitle">Phone Number</label>
-              <input className="userforminput" placeholder="e.g., +91 98765 43210"/>
+              <input name="phone" className="userforminput" placeholder="e.g., +91 98765 43210" value={form.phone} onChange={handleChange}/>
             </div>
 
             <div className="formGroup">
-              <label className="userinfotitle">User Tier</label>
-              <select className="userforminput" >
-                <option>Basic</option>
-                <option>Pro</option>
-                <option>Elite</option>
-              </select>
+              <label className="userinfotitle">City</label>
+              <input name="city" className="userforminput" placeholder="e.g., Mumbai" value={form.city} onChange={handleChange}/>
             </div>
 
             <div className="formGroup">
-              <label className="userinfotitle">Location</label>
-              <select className="userforminput" >
-                <option>Select city</option>
-              </select>
+              <label className="userinfotitle">State</label>
+              <input name="state" className="userforminput" placeholder="e.g., Maharashtra" value={form.state} onChange={handleChange}/>
             </div>
 
           </div>
@@ -124,14 +167,14 @@ const CreateNewUser = () => {
 
           <div className="formGroup">
             <label>Status</label>
-            <select className="userforminput" >
+            <select name="isActive" className="userforminput" value={form.isActive ? "Active" : "Inactive"} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.value === "Active" }))}>
               <option>Active</option>
               <option>Inactive</option>
             </select>
           </div>
         
-          <button className="createBtn">Create User</button>
-          <button className="cancelBtn">Cancel</button>
+          <button type="button" className="createBtn" onClick={handleSubmit} disabled={submitting}>{submitting ? "Creating…" : "Create User"}</button>
+          <button type="button" className="cancelBtn" onClick={() => navigate("/users")}>Cancel</button>
 
         </div>
 

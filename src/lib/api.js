@@ -1,16 +1,21 @@
 import axios from "axios";
+import { getToken } from "./auth";
 
-// const token = localStorage.getItem("token");
-const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiNjYyYWQ4OTItZGZjNS00NzQ5LWE0MTItMWM1Njc1NjZiMjRiIiwiZW1haWwiOiJhZG1pbkBiaWxsaW9uYWlyZWF1Y3Rpb24uY29tIiwiaWF0IjoxNzcxMjI5NTMwLCJleHAiOjQzNjMyMjk1MzB9.oxQFohQbne-7mJr2O3R9J799AHrTgCyGT4GEER2y-gI";
+const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
 const api = axios.create({
-  // baseURL: "http://localhost:5001",
-  baseURL: "https://3nkfewwusk.ap-south-1.awsapprunner.com",
+  baseURL,
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
   },
+});
+
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export default api;

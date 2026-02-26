@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import './Activity.css';
 import { FiActivity } from "react-icons/fi"
 import { MdAccessTime } from "react-icons/md";
@@ -6,10 +6,6 @@ import { FaArrowTrendUp } from "react-icons/fa6";
 import { FaRegStar } from "react-icons/fa";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import luxuryVilla from '../../assets/Luxury Villa.png';
-import rollsRoice from '../../assets/Rolls Royce.png';
-import pentHouse from '../../assets/Penthouse.png';
-import mercedes from '../../assets/Mercedes.png';
-import beachfront from '../../assets/Beachfront.png';
 import { AiOutlineShop } from "react-icons/ai";
 import { LuCrown } from "react-icons/lu";
 import { CiLocationOn } from "react-icons/ci";
@@ -22,23 +18,88 @@ import { FaLink } from "react-icons/fa6";
 import { MdOutlineFileUpload } from "react-icons/md";
 import { FaRegEye } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
+import {
+  fetchPendingApprovals,
+  fetchFeaturedRecommended,
+  approveProduct as apiApproveProduct,
+  updateFeaturedRecommended as apiUpdateFeaturedRecommended,
+} from "../../lib/activity";
+import { getFile } from "../../lib/s3";
 
-
-
+const LISTING_LABELS = { MARKETPLACE: "Marketplace", BUY_NOW: "Buy Now", AUCTIONS: "Auctions", TO_LET: "To-let" };
+const CATEGORY_LABELS = { REAL_ESTATE: "Properties", CARS: "Cars", BIKES: "Bikes", FURNITURE: "Furniture", JEWELLERY_AND_WATCHES: "Watches", ARTS_AND_PAINTINGS: "Arts", ANTIQUES: "Antiques", COLLECTABLES: "Collectables" };
+const formatCurrency = (v) => v != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(Number(v)) : "N/A";
+const getLocation = (meta) => meta && typeof meta === "object" && (meta.location || meta.city || [meta.area, meta.city].filter(Boolean).join(", ") || meta.state || meta.address) || "—";
+const getViews = (meta) => (meta && typeof meta === "object" && Number(meta.views)) || 0;
+const formatDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { year: "numeric", month: "2-digit", day: "2-digit" }) : "—";
 
 
 
 const Activitypage = () => {
     const [activeTab, setActiveTab] = useState("approvals");
     const [isEnabled, setIsEnabled] = useState(false);
-    const [activeSwitch, setActiveSwitch] = useState(null); 
-    const handleToggle = () => {setIsEnabled(!isEnabled);};
-    const [verified, setVerified] = useState(false);
-    const [activeType, setActiveType] = useState(null);
+    const handleToggle = () => { setIsEnabled(!isEnabled); };
+    const [pendingProducts, setPendingProducts] = useState([]);
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [actioningId, setActioningId] = useState(null);
+    const [featuredSearch, setFeaturedSearch] = useState("");
 
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const [pRes, fRes] = await Promise.all([fetchPendingApprovals(), fetchFeaturedRecommended()]);
+            setPendingProducts(pRes.data || []);
+            setFeaturedProducts(fRes.data || []);
+        } catch (err) {
+            setError(err?.response?.data?.message || err?.message || "Failed to load activity");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
+    useEffect(() => { loadData(); }, [loadData]);
 
-  return <div className='activitycontainer'>
+    const handleApprove = async (id, approvalStatus, tier) => {
+        setActioningId(id);
+        try {
+            await apiApproveProduct(id, approvalStatus === "APPROVED" ? { approvalStatus: "APPROVED", tier } : { approvalStatus: "REJECTED" });
+            setPendingProducts((prev) => prev.filter((p) => p.id !== id));
+        } catch (err) {
+            setError(err?.response?.data?.message || "Update failed");
+        } finally {
+            setActioningId(null);
+        }
+    };
+
+    const handleFeaturedRecommended = async (id, isFeatured, isRecommended) => {
+        setActioningId(id);
+        try {
+            await apiUpdateFeaturedRecommended(id, { isFeatured, isRecommended });
+            setFeaturedProducts((prev) => prev.map((p) => (p.id === id ? { ...p, isFeatured, isRecommended } : p)));
+        } catch (err) {
+            setError(err?.response?.data?.message || "Update failed");
+        } finally {
+            setActioningId(null);
+        }
+    };
+
+    const pendingCount = pendingProducts.length;
+    const featuredCount = featuredProducts.length;
+    const featuredFiltered = !featuredSearch.trim()
+        ? featuredProducts
+        : featuredProducts.filter((p) => {
+            const q = featuredSearch.trim().toLowerCase();
+            const title = (p.title || "").toLowerCase();
+            const cat = (CATEGORY_LABELS[p.category] || p.category || "").toLowerCase();
+            const loc = getLocation(p.meta).toLowerCase();
+            const val = String(p.value || "").toLowerCase();
+            return title.includes(q) || cat.includes(q) || loc.includes(q) || val.includes(q);
+          });
+
+    return <div className='activitycontainer'>
     <div className='activityheader'>
         <h1 className='activityheadline'><FiActivity className="activityicon" /><span className="gradient-text">Activity Center</span></h1>
         <p className='activitydesc'>Manage product approvals, advertisements, and featured listings</p>
@@ -49,7 +110,7 @@ const Activitypage = () => {
                 <h2>Pending Approvals</h2>
                 <span className='analyticsicon'><MdAccessTime /></span>
             </div>
-            <h2 className='analyticnum'>5</h2>
+            <h2 className='analyticnum'>{loading ? "—" : pendingCount}</h2>
             <span className='analyticdesc'>Products awaiting review</span>
         </div>
         <div className='activityanalytic1'>
@@ -65,191 +126,62 @@ const Activitypage = () => {
                 <h2>Featured Items</h2>
                 <span className='analyticsicon'><FaRegStar /></span>
             </div>
-            <h2 className='analyticnum2'>5</h2>
+            <h2 className='analyticnum2'>{loading ? "—" : featuredCount}</h2>
             <span className='analyticdesc2'>Premium highlighted products</span>
         </div>
     </div>
     <ul className='activitycat'>
-        <li className={`catmenu2 ${activeTab === "approvals" ? "active-approvals" : ""}`}onClick={() => setActiveTab("approvals")}><IoCheckmarkCircleOutline />Product Approvals <span className='catnum'>5</span> </li>
-        <li className={`catmenu2 ${activeTab === "ads" ? "active-ads" : ""}`}onClick={() => setActiveTab("ads")}><FaArrowTrendUp />Advertisements <span className='catnum'>3</span> </li>
-        <li className={`catmenu2 ${activeTab === "featured" ? "active-featured" : ""}`}onClick={() => setActiveTab("featured")}><FaRegStar />Featured & Recommended <span className='catnum'>5</span> </li>
+        <li className={`catmenu2 ${activeTab === "approvals" ? "active-approvals" : ""}`} onClick={() => setActiveTab("approvals")}><IoCheckmarkCircleOutline />Product Approvals <span className='catnum'>{pendingCount}</span> </li>
+        <li className={`catmenu2 ${activeTab === "ads" ? "active-ads" : ""}`} onClick={() => setActiveTab("ads")}><FaArrowTrendUp />Advertisements <span className='catnum'>3</span> </li>
+        <li className={`catmenu2 ${activeTab === "featured" ? "active-featured" : ""}`} onClick={() => setActiveTab("featured")}><FaRegStar />Featured & Recommended <span className='catnum'>{featuredCount}</span> </li>
     </ul>
+    {error && <p className='analyticdesc' style={{ marginLeft: 20 }}>{error}</p>}
     {activeTab === "approvals" && (
     <div className='activitydetail'>
         <div className='detailheader'>
             <h2 className='detailheading'>Pending Product Approvals</h2>
             <span className='detaildesc'>Review and approve products for Marketplace, Buy Now, and Auctions as General, Luxury, or Classic tier</span>
         </div>
-        <div className='activityinfo'>
-            <img src={luxuryVilla} alt='career image' className='activityimg'/>
+        {loading ? <p className='activityinfoicon'>Loading…</p> : pendingProducts.length === 0 ? <p className='activityinfoicon'>No pending approvals</p> : pendingProducts.map((product) => {
+            const isMarketplace = product.listingType === "MARKETPLACE";
+            const ListingIcon = product.listingType === "AUCTIONS" ? TbHammer : product.listingType === "BUY_NOW" ? BsLightningCharge : AiOutlineShop;
+            return (
+        <div key={product.id} className='activityinfo'>
+            <img src={getFile(product.media?.[0] || "")} alt='' className='activityimg'/>
             <div className='activityinfodiv'>
                 <div className='activityinfoheader'>
                     <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Luxury Villa - Juhu Beach</h2>
-                        <h3 className='activityinfoprice'>₹15 Cr</h3>
+                        <h2 className='activityinfoheading'>{product.title}</h2>
+                        <h3 className='activityinfoprice'>{formatCurrency(product.value)}</h3>
                     </div>
                     <ul className='activityinfotags'>
-                        <li className='businesscat'><AiOutlineShop />Marketplace</li>
-                        <li className='productcat'>Properties</li>
-                        <li className='plancat'><LuCrown />Elite</li>
+                        <li className={isMarketplace ? 'businesscat' : 'businesscat1'}><ListingIcon />{LISTING_LABELS[product.listingType] || product.listingType}</li>
+                        <li className='productcat'>{CATEGORY_LABELS[product.category] || product.category}</li>
+                        {product.tier && <li className='plancat'><LuCrown />{product.tier}</li>}
                     </ul>
                 </div>
                 <div className='activityinfodetails'>
                     <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'><CiLocationOn />Mumbai, Maharshatra</span>
-                        <span className='activityinfoicon'><MdAccessTime />Submitted: 2024-02-05</span>
+                        <span className='activityinfoicon'><CiLocationOn />{getLocation(product.meta)}</span>
+                        <span className='activityinfoicon'><MdAccessTime />Submitted: {formatDate(product.createdAt)}</span>
                     </div>
                     <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'>By: Rajesh Sharma</span>
+                        <span className='activityinfoicon'>By: {product.owner?.name || "—"}</span>
                     </div>
                 </div>
                 <div className='activityapprovedtags'>
                     <h2 className='activityapprovedtitle'>Approve as Tier:</h2>
                     <ul className='activityapprovedtag'>
-                        <li className='generaltag'><SlBadge />General</li>
-                        <li className='luxurytag'><LuCrown />Luxury</li>
-                        <li className='classictag'><BsStars />Classic</li>
-                        <li className='rejecttag'><IoIosCloseCircleOutline />Reject</li>
+                        <li className='generaltag' onClick={() => !actioningId && handleApprove(product.id, "APPROVED", "GENERAL")} style={{ cursor: actioningId ? "default" : "pointer" }}><SlBadge />General</li>
+                        <li className='luxurytag' onClick={() => !actioningId && handleApprove(product.id, "APPROVED", "LUXURY")} style={{ cursor: actioningId ? "default" : "pointer" }}><LuCrown />Luxury</li>
+                        <li className='classictag' onClick={() => !actioningId && handleApprove(product.id, "APPROVED", "CLASSIC")} style={{ cursor: actioningId ? "default" : "pointer" }}><BsStars />Classic</li>
+                        <li className='rejecttag' onClick={() => !actioningId && handleApprove(product.id, "REJECTED")} style={{ cursor: actioningId ? "default" : "pointer" }}><IoIosCloseCircleOutline />Reject</li>
                     </ul>
                 </div>
             </div>
         </div>
-        <div className='activityinfo'>
-            <img src={rollsRoice} alt='career image' className='activityimg'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Vintage Rolls Royce Phantom</h2>
-                        <h3 className='activityinfoprice'>₹8.5 Cr</h3>
-                    </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat1'><TbHammer />Auctions</li>
-                        <li className='productcat'>Cars</li>
-                        <li className='plancat'><LuCrown />Pro</li>
-                    </ul>
-                </div>
-                <div className='activityinfodetails'>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'><CiLocationOn />Delhi, Delhi</span>
-                        <span className='activityinfoicon'><MdAccessTime />Submitted: 2024-02-04</span>
-                    </div>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'>By: Priya Malhotra</span>
-                    </div>
-                </div>
-                <div className='activityapprovedtags'>
-                    <h2 className='activityapprovedtitle'>Approve as Tier:</h2>
-                    <ul className='activityapprovedtag'>
-                        <li className='generaltag'><SlBadge />General</li>
-                        <li className='luxurytag'><LuCrown />Luxury</li>
-                        <li className='classictag'><BsStars />Classic</li>
-                        <li className='rejecttag'><IoIosCloseCircleOutline />Reject</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div className='activityinfo'>
-            <img src={pentHouse} alt='career image' className='activityimg'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Duplex Penthouse - Whitefield</h2>
-                        <h3 className='activityinfoprice'>₹6.2 Cr</h3>
-                    </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat1'><BsLightningCharge />Buy Now</li>
-                        <li className='productcat'>Properties</li>
-                        <li className='plancat'><LuCrown />Elite</li>
-                    </ul>
-                </div>
-                <div className='activityinfodetails'>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'><CiLocationOn />Bangalore, Karnataka</span>
-                        <span className='activityinfoicon'><MdAccessTime />Submitted: 2024-02-04</span>
-                    </div>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'>By: Vikram Patel</span>
-                    </div>
-                </div>
-                <div className='activityapprovedtags'>
-                    <h2 className='activityapprovedtitle'>Approve as Tier:</h2>
-                    <ul className='activityapprovedtag'>
-                        <li className='generaltag'><SlBadge />General</li>
-                        <li className='luxurytag'><LuCrown />Luxury</li>
-                        <li className='classictag'><BsStars />Classic</li>
-                        <li className='rejecttag'><IoIosCloseCircleOutline />Reject</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div className='activityinfo'>
-            <img src={mercedes} alt='career image' className='activityimg'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Mercedes-Benz S-Class 2023</h2>
-                        <h3 className='activityinfoprice'>₹1.8 Cr</h3>
-                    </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat1'><AiOutlineShop />Marketplace</li>
-                        <li className='productcat'>Cars</li>
-                        <li className='plancat'><LuCrown />Basic</li>
-                    </ul>
-                </div>
-                <div className='activityinfodetails'>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'><CiLocationOn />Hyderabad, Telangana</span>
-                        <span className='activityinfoicon'><MdAccessTime />Submitted: 2024-02-03</span>
-                    </div>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'>By: Ananya Reddy</span>
-                    </div>
-                </div>
-                <div className='activityapprovedtags'>
-                    <h2 className='activityapprovedtitle'>Approve as Tier:</h2>
-                    <ul className='activityapprovedtag'>
-                        <li className='generaltag'><SlBadge />General</li>
-                        <li className='luxurytag'><LuCrown />Luxury</li>
-                        <li className='classictag'><BsStars />Classic</li>
-                        <li className='rejecttag'><IoIosCloseCircleOutline />Reject</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div className='activityinfo'>
-            <img src={beachfront} alt='career image' className='activityimg'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Beachfront Villa - Goa</h2>
-                        <h3 className='activityinfoprice'>₹12 Cr</h3>
-                    </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat1'><TbHammer />Auctions</li>
-                        <li className='productcat'>Properties</li>
-                        <li className='plancat'><LuCrown />Pro</li>
-                    </ul>
-                </div>
-                <div className='activityinfodetails'>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'><CiLocationOn />Goa, Goa</span>
-                        <span className='activityinfoicon'><MdAccessTime />Submitted: 2024-02-03</span>
-                    </div>
-                    <div className='activityinfodetailrow'>
-                        <span className='activityinfoicon'>By: Arjun Khanna</span>
-                    </div>
-                </div>
-                <div className='activityapprovedtags'>
-                    <h2 className='activityapprovedtitle'>Approve as Tier:</h2>
-                    <ul className='activityapprovedtag'>
-                        <li className='generaltag'><SlBadge />General</li>
-                        <li className='luxurytag'><LuCrown />Luxury</li>
-                        <li className='classictag'><BsStars />Classic</li>
-                        <li className='rejecttag'><IoIosCloseCircleOutline />Reject</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+            );
+        })}
     </div>
     )}
     {activeTab === "ads" && (
@@ -407,307 +339,62 @@ const Activitypage = () => {
             <FiSearch className="searchIcon" />
             <input
                 type="text"
+                value={featuredSearch}
+                onChange={(e) => setFeaturedSearch(e.target.value)}
                 placeholder="Search products by name, category, location, or price..."
                 className="searchInput"
             />
         </div>
-        <span className="searchdesc">5 products found</span>
-        <div className='activityinfo1'>
-            <img src={luxuryVilla} alt='career image' className='activityimg1'/>
+        <span className="searchdesc">{loading ? "…" : `${featuredFiltered.length} products found`}</span>
+        {loading ? <p className='activityinfoicon'>Loading…</p> : featuredFiltered.length === 0 ? <p className='activityinfoicon'>No featured or recommended products</p> : featuredFiltered.map((product) => {
+            const isMarketplace = product.listingType === "MARKETPLACE";
+            const ListingIcon = product.listingType === "AUCTIONS" ? TbHammer : product.listingType === "BUY_NOW" ? BsLightningCharge : AiOutlineShop;
+            return (
+        <div key={product.id} className='activityinfo1'>
+            <img src={getFile(product.media?.[0] || "")} alt='' className='activityimg1'/>
             <div className='activityinfodiv'>
                 <div className='activityinfoheader'>
                     <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Sea-Facing Penthouse - Marine Drive</h2>
-                        <h3 className='activityinfoprice'>₹25 Cr</h3>
+                        <h2 className='activityinfoheading'>{product.title}</h2>
+                        <h3 className='activityinfoprice'>{formatCurrency(product.value)}</h3>
                     </div>
                     <ul className='activityinfotags'>
-                        <li className='businesscat'><AiOutlineShop />Marketplace</li>
-                        <li className='productcat'>Properties</li>
-                        <li className='viewcat'><FaRegEye />12,345 views</li>
+                        <li className={isMarketplace ? 'businesscat' : 'businesscat1'}><ListingIcon />{LISTING_LABELS[product.listingType] || product.listingType}</li>
+                        <li className='productcat'>{CATEGORY_LABELS[product.category] || product.category}</li>
+                        <li className='viewcat'><FaRegEye />{getViews(product.meta).toLocaleString()} views</li>
                     </ul>
                 </div>
-                <span className='activityinfoicon'><CiLocationOn />Mumbai, Maharshatra</span>
-            <div className='activityapprovedtags1'>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "featured"}
-                            onChange={() =>
-                                setActiveType(activeType === "featured" ? null : "featured")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">⭐ Featured</span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "recommended"}
-                            onChange={() =>
-                                setActiveType(activeType === "recommended" ? null : "recommended")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">
-                        <FaArrowTrendUp /> Recommended
-                    </span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={verified}
-                            onChange={() => setVerified(!verified)}
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">✔️ Verified</span>
-                </div>
-
-            </div>
-
-            </div>
-        </div>
-        <div className='activityinfo1'>
-            <img src={mercedes} alt='career image' className='activityimg1'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Ferrari F8 Tributo 2022</h2>
-                        <h3 className='activityinfoprice'>₹5.8 Cr</h3>
-                    </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat1'><BsLightningCharge />Buy Now</li>
-                        <li className='productcat'>Cars</li>
-                        <li className='viewcat'><FaRegEye />8,756 views</li>
-                    </ul>
-                </div>
-                <span className='activityinfoicon'><CiLocationOn />Bangalore, Karnataka</span>
+                <span className='activityinfoicon'><CiLocationOn />{getLocation(product.meta)}</span>
                 <div className='activityapprovedtags1'>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "featured"}
-                            onChange={() =>
-                                setActiveType(activeType === "featured" ? null : "featured")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">⭐ Featured</span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "recommended"}
-                            onChange={() =>
-                                setActiveType(activeType === "recommended" ? null : "recommended")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">
-                        <FaArrowTrendUp /> Recommended
-                    </span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={verified}
-                            onChange={() => setVerified(!verified)}
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">✔️ Verified</span>
-                </div>
-
-            </div>
-            </div>
-        </div>
-        <div className='activityinfo1'>
-            <img src={beachfront} alt='career image' className='activityimg1'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Private Yacht - 80ft Luxury</h2>
-                        <h3 className='activityinfoprice'>₹18 Cr</h3>
+                    <div>
+                        <label className="switcher">
+                            <input
+                                type="checkbox"
+                                checked={!!product.isFeatured}
+                                disabled={actioningId === product.id}
+                                onChange={() => handleFeaturedRecommended(product.id, !product.isFeatured, product.isRecommended)}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                        <span className="switchedtag">⭐ Featured</span>
                     </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat1'><TbHammer />Auctions</li>
-                        <li className='productcat'>Yachts</li>
-                        <li className='viewcat'><FaRegEye />15,234 views</li>
-                    </ul>
-                </div>
-                <span className='activityinfoicon'><CiLocationOn />Goa, Goa</span>
-                <div className='activityapprovedtags1'>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "featured"}
-                            onChange={() =>
-                                setActiveType(activeType === "featured" ? null : "featured")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">⭐ Featured</span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "recommended"}
-                            onChange={() =>
-                                setActiveType(activeType === "recommended" ? null : "recommended")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">
-                        <FaArrowTrendUp /> Recommended
-                    </span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={verified}
-                            onChange={() => setVerified(!verified)}
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">✔️ Verified</span>
-                </div>
-
-            </div>
-            </div>
-        </div>
-        <div className='activityinfo1'>
-            <img src={pentHouse} alt='career image' className='activityimg1'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Luxury Farmhouse - Lonavala</h2>
-                        <h3 className='activityinfoprice'>₹9.5 Cr</h3>
+                    <div>
+                        <label className="switcher">
+                            <input
+                                type="checkbox"
+                                checked={!!product.isRecommended}
+                                disabled={actioningId === product.id}
+                                onChange={() => handleFeaturedRecommended(product.id, product.isFeatured, !product.isRecommended)}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                        <span className="switchedtag"><FaArrowTrendUp /> Recommended</span>
                     </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat'><AiOutlineShop />Marketplace</li>
-                        <li className='productcat'>Properties</li>
-                        <li className='viewcat'><FaRegEye />6,432 views</li>
-                    </ul>
                 </div>
-                <span className='activityinfoicon'><CiLocationOn />Pune, Maharshatra</span>
-                <div className='activityapprovedtags1'>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "featured"}
-                            onChange={() =>
-                                setActiveType(activeType === "featured" ? null : "featured")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">⭐ Featured</span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "recommended"}
-                            onChange={() =>
-                                setActiveType(activeType === "recommended" ? null : "recommended")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">
-                        <FaArrowTrendUp /> Recommended
-                    </span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={verified}
-                            onChange={() => setVerified(!verified)}
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">✔️ Verified</span>
-                </div>
-
-            </div>
             </div>
         </div>
-        <div className='activityinfo1'>
-            <img src={rollsRoice} alt='career image' className='activityimg1'/>
-            <div className='activityinfodiv'>
-                <div className='activityinfoheader'>
-                    <div className='activityinfohead'>
-                        <h2 className='activityinfoheading'>Patek Philippe Nautilus</h2>
-                        <h3 className='activityinfoprice'>₹25 Cr</h3>
-                    </div>
-                    <ul className='activityinfotags'>
-                        <li className='businesscat1'><BsLightningCharge />Buy Now</li>
-                        <li className='productcat'>Watches</li>
-                        <li className='viewcat'><FaRegEye />9,123 views</li>
-                    </ul>
-                </div>
-                <span className='activityinfoicon'><CiLocationOn />Delhi, Delhi</span>
-                <div className='activityapprovedtags1'>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "featured"}
-                            onChange={() =>
-                                setActiveType(activeType === "featured" ? null : "featured")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">⭐ Featured</span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={activeType === "recommended"}
-                            onChange={() =>
-                                setActiveType(activeType === "recommended" ? null : "recommended")
-                            }
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">
-                        <FaArrowTrendUp /> Recommended
-                    </span>
-                </div>
-                <div>
-                    <label className="switcher">
-                        <input
-                            type="checkbox"
-                            checked={verified}
-                            onChange={() => setVerified(!verified)}
-                        />
-                        <span className="slider"></span>
-                    </label>
-                    <span className="switchedtag">✔️ Verified</span>
-                </div>
-
-            </div>
-            </div>
-        </div>
+            );
+        })}
     </div>
     )}
   </div>;

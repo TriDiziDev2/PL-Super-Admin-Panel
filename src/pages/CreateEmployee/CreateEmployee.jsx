@@ -1,11 +1,71 @@
-import React from "react";
+import React, { useState } from "react";
 import "./CreateEmployee.css";
 import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { createEmployee } from "../../lib/employees";
 
 export default function CreateEmployee() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    designation: "",
+    department: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-    const navigate = useNavigate();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!form.name?.trim()) {
+      setError("Full name is required.");
+      return;
+    }
+    if (!form.email?.trim()) {
+      setError("Email is required.");
+      return;
+    }
+    if (!form.password) {
+      setError("Password is required.");
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      setError("Password and Confirm password do not match.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await createEmployee({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        phone: form.phone.trim() || undefined,
+        designation: form.designation.trim() || undefined,
+        department: form.department.trim() || undefined,
+      });
+      navigate("/employees");
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to create employee.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => navigate("/employees");
 
   return (
     <div className="create-employee-wrapper">
@@ -20,6 +80,13 @@ export default function CreateEmployee() {
         </div>
       </div>
 
+      {error && (
+        <div className="create-employee-error" role="alert">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit}>
       <div className="card-section">
         <div className="card-header">
           <h2>Employee Information</h2>
@@ -30,17 +97,37 @@ export default function CreateEmployee() {
 
           <div className="form-group full">
             <label>Full Name *</label>
-            <input type="text" placeholder="Sayyad Basheer Ahamad" />
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Sayyad Basheer Ahamad"
+              required
+            />
           </div>
 
           <div className="form-group">
             <label>Email Address *</label>
-            <input type="email" placeholder="example@gmail.com" />
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="example@gmail.com"
+              required
+            />
           </div>
 
           <div className="form-group">
-            <label>Phone Number *</label>
-            <input type="text" placeholder="+91 98765 43210" />
+            <label>Phone Number</label>
+            <input
+              type="text"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="+91 98765 43210"
+            />
           </div>
 
           <div className="form-group">
@@ -119,12 +206,28 @@ export default function CreateEmployee() {
           </div>
 
           <div className="form-group">
-            <label>Role *</label>
-            <select  className="inputtextoption">
-              <option>Select role</option>
-              <option>Admin</option>
-              <option>Employee</option>
+            <label>Role</label>
+            <select
+              className="inputtextoption"
+              name="designation"
+              value={form.designation}
+              onChange={handleChange}
+            >
+              <option value="">Select role</option>
+              <option value="Admin">Admin</option>
+              <option value="Employee">Employee</option>
             </select>
+          </div>
+
+          <div className="form-group">
+            <label>Department</label>
+            <input
+              type="text"
+              name="department"
+              value={form.department}
+              onChange={handleChange}
+              placeholder="e.g., Sales, Operations"
+            />
           </div>
 
           <div className="form-group">
@@ -153,18 +256,27 @@ export default function CreateEmployee() {
 
         <div className="form-grid three">
           <div className="form-group">
-            <label>Username *</label>
-            <input type="text" placeholder="e.g., amit.verma" />
-          </div>
-
-          <div className="form-group">
             <label>Password *</label>
-            <input type="password" placeholder="Enter strong password" />
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Enter strong password"
+              required
+            />
           </div>
 
           <div className="form-group">
             <label>Confirm Password *</label>
-            <input type="password" placeholder="Re-enter password" />
+            <input
+              type="password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Re-enter password"
+              required
+            />
           </div>
         </div>
       </div>
@@ -184,10 +296,15 @@ export default function CreateEmployee() {
         </div>
 
         <div className="form-footer">
-          <button className="btn cancel">Cancel</button>
-          <button className="btn primary">Create Employee</button>
+          <button type="button" className="btn cancel" onClick={handleCancel}>
+            Cancel
+          </button>
+          <button type="submit" className="btn primary" disabled={loading}>
+            {loading ? "Creating…" : "Create Employee"}
+          </button>
         </div>
       </div>
+      </form>
 
     </div>
   );

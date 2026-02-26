@@ -1,5 +1,7 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { getToken } from "./lib/auth";
 import LandingPage from './pages/LandingPage/LandingPage';
+import Login from './pages/Login/Login';
 import DashboardPage from './pages/Dashboard/Dashboard';
 import Products from './pages/Products/Products';
 import Users from './pages/Users/Users';
@@ -11,6 +13,7 @@ import Settings from './pages/Settings/Settings';
 import Activity from './pages/ActivityCenter/Activity';
 import ProductCreation from './pages/ProductCreation/productcreation';
 import ProductPage from "./pages/ProductPage/ProductPage";
+import ProductEdit from "./pages/ProductEdit/ProductEdit";
 import CreateNewUser from "./pages/CreateNewUser/CreateNewUser";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import LeadDetails from "./pages/LeadDetails/LeadDetails";
@@ -21,13 +24,12 @@ import EnquiryDetails from "./pages/EnquiryDetails/EnquiryDetails";
 
 
 
-
-
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<LandingPage />}>
+        <Route path="/login" element={getToken() ? <Navigate to="/" replace /> : <Login />} />
+        <Route path='/' element={getToken() ? <LandingPage /> : <Navigate to="/login" replace />}>
           <Route index element={<DashboardPage />} />
           <Route path='products' element={<Products />} />
           <Route path='users' element={<Users />} />
@@ -38,12 +40,13 @@ const App = () => {
           <Route path='enquiries' element={<Enquiries />} />
           <Route path='settings' element={<Settings />} />
           <Route path='productcreation' element={<ProductCreation/>} />
-          <Route path='productpage' element={<ProductPage/>} />
+          <Route path='productpage/:id' element={<ProductPage/>} />
+          <Route path='productedit/:id' element={<ProductEdit/>} />
           <Route path="create-user" element={<CreateNewUser />} />
-          <Route path="userprofile" element={<UserProfile />} />
+          <Route path="userprofile/:id" element={<UserProfile />} />
           <Route path='leaddetails' element={ <LeadDetails /> } />
           <Route path="/addlead" element={<AddLead />} />
-          <Route path="/employeedetails" element={<EmployeeDetails />} />
+          <Route path="/employeedetails/:id" element={<EmployeeDetails />} />
           <Route path="/createemployee" element={<CreateEmployee />} />
           <Route path="/enquirydetails" element={<EnquiryDetails />} />
 
