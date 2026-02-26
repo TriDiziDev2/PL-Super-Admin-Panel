@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import './Products.css';
+import "./Products.css";
 import { FaPlus } from "react-icons/fa6";
 import { IoCubeOutline } from "react-icons/io5";
 import { IoEyeOutline } from "react-icons/io5";
@@ -23,13 +23,6 @@ import { BsThreeDots } from "react-icons/bs";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { LiaCertificateSolid } from "react-icons/lia";
 import api from "../../lib/api";
-
-
-
-
-
-
-
 
 const LISTING_TYPE_BY_TAB = {
   marketplace: "MARKETPLACE",
@@ -62,8 +55,16 @@ const CATEGORY_FILTERS = [
   { value: "CARS", label: "Cars", icon: LiaCarSideSolid },
   { value: "BIKES", label: "Bikes", icon: MdDirectionsBike },
   { value: "FURNITURE", label: "Furniture", icon: RiSofaLine },
-  { value: "JEWELLERY_AND_WATCHES", label: "Jewellery & Watches", icon: IoDiamondOutline },
-  { value: "ARTS_AND_PAINTINGS", label: "Arts & Paintings", icon: PiPaintBrushFill },
+  {
+    value: "JEWELLERY_AND_WATCHES",
+    label: "Jewellery & Watches",
+    icon: IoDiamondOutline,
+  },
+  {
+    value: "ARTS_AND_PAINTINGS",
+    label: "Arts & Paintings",
+    icon: PiPaintBrushFill,
+  },
   { value: "ANTIQUES", label: "Antiques", icon: BsStars },
   { value: "COLLECTABLES", label: "Collectables", icon: HiOutlineCube },
   { value: "OTHERS", label: "Others", icon: BsThreeDots },
@@ -84,7 +85,8 @@ const formatCurrency = (value) => {
   }).format(Number(value));
 };
 
-const formatCount = (value) => new Intl.NumberFormat("en-IN").format(Number(value || 0));
+const formatCount = (value) =>
+  new Intl.NumberFormat("en-IN").format(Number(value || 0));
 
 const getLocationText = (meta) => {
   if (!meta || typeof meta !== "object") return "Location not added";
@@ -126,6 +128,7 @@ const Products = () => {
         setErrorMessage("");
         const response = await api.get("/api/product");
         setProducts(response?.data?.data || []);
+        console.log(response?.data?.data);
       } catch (error) {
         const message =
           error?.response?.data?.message ||
@@ -142,9 +145,17 @@ const Products = () => {
 
   const stats = useMemo(() => {
     const totalProducts = products.length;
-    const activeListings = products.filter((item) => item.approvalStatus === "APPROVED").length;
-    const totalViews = products.reduce((sum, item) => sum + getViews(item.meta), 0);
-    const totalValue = products.reduce((sum, item) => sum + Number(item.value || 0), 0);
+    const activeListings = products.filter(
+      (item) => item.approvalStatus === "APPROVED",
+    ).length;
+    const totalViews = products.reduce(
+      (sum, item) => sum + getViews(item.meta),
+      0,
+    );
+    const totalValue = products.reduce(
+      (sum, item) => sum + Number(item.value || 0),
+      0,
+    );
     return { totalProducts, activeListings, totalViews, totalValue };
   }, [products]);
 
@@ -156,7 +167,9 @@ const Products = () => {
       if (item.listingType !== listingType) return false;
       if (selectedCategoryFilter !== "ALL") {
         if (selectedCategoryFilter === "OTHERS") {
-          if (Object.prototype.hasOwnProperty.call(CATEGORY_LABELS, item.category)) {
+          if (
+            Object.prototype.hasOwnProperty.call(CATEGORY_LABELS, item.category)
+          ) {
             return false;
           }
         } else if (item.category !== selectedCategoryFilter) {
@@ -166,7 +179,11 @@ const Products = () => {
       if (!query) return true;
 
       const location = getLocationText(item.meta).toLowerCase();
-      const category = (CATEGORY_LABELS[item.category] || item.category || "").toLowerCase();
+      const category = (
+        CATEGORY_LABELS[item.category] ||
+        item.category ||
+        ""
+      ).toLowerCase();
       const title = (item.title || "").toLowerCase();
       const value = String(item.value || "").toLowerCase();
       return (
@@ -178,7 +195,10 @@ const Products = () => {
     });
   }, [products, search, selectedCat, selectedCategoryFilter]);
 
-  const productRows = useMemo(() => chunkProducts(visibleProducts), [visibleProducts]);
+  const productRows = useMemo(
+    () => chunkProducts(visibleProducts),
+    [visibleProducts],
+  );
 
   const renderFilters = () => {
     return (
@@ -202,52 +222,100 @@ const Products = () => {
   };
 
   return (
-    <div className='productscontainer'>
-      <div className='producthead'>
-        <div className='productheadinfo'>
-          <h1 className='productsheader'>Product Management</h1>
-          <span className='productheaddesc'>Manage products across Marketplace, Buy Now, Auctions & To-Let</span>
+    <div className="productscontainer">
+      <div className="producthead">
+        <div className="productheadinfo">
+          <h1 className="productsheader">Product Management</h1>
+          <span className="productheaddesc">
+            Manage products across Marketplace, Buy Now, Auctions & To-Let
+          </span>
         </div>
-        <button className='addproduct' onClick={() => navigate("/productcreation")}><FaPlus />Add Product</button>
+        <button
+          className="addproduct"
+          onClick={() => navigate("/productcreation")}
+        >
+          <FaPlus />
+          Add Product
+        </button>
       </div>
 
-      <ul className='producthighlights'>
-        <li className='producthighlight'>
-          <div className='producthighlightinfo'>
-            <span className='producthighlighttitle'>Total Products</span><br />
-            <span className='producthighlightnum'>{formatCount(stats.totalProducts)}</span>
+      <ul className="producthighlights">
+        <li className="producthighlight">
+          <div className="producthighlightinfo">
+            <span className="producthighlighttitle">Total Products</span>
+            <br />
+            <span className="producthighlightnum">
+              {formatCount(stats.totalProducts)}
+            </span>
           </div>
-          <div className='producthighlighticon'><IoCubeOutline /></div>
+          <div className="producthighlighticon">
+            <IoCubeOutline />
+          </div>
         </li>
-        <li className='producthighlight1'>
-          <div className='producthighlightinfo'>
-            <span className='producthighlighttitle'>Active Listings</span><br />
-            <span className='producthighlightnum1'>{formatCount(stats.activeListings)}</span>
+        <li className="producthighlight1">
+          <div className="producthighlightinfo">
+            <span className="producthighlighttitle">Active Listings</span>
+            <br />
+            <span className="producthighlightnum1">
+              {formatCount(stats.activeListings)}
+            </span>
           </div>
-          <div className='producthighlighticon1'><IoEyeOutline /></div>
+          <div className="producthighlighticon1">
+            <IoEyeOutline />
+          </div>
         </li>
-        <li className='producthighlight1'>
-          <div className='producthighlightinfo'>
-            <span className='producthighlighttitle'>Total Views</span><br />
-            <span className='producthighlightnum1'>{formatCount(stats.totalViews)}</span>
+        <li className="producthighlight1">
+          <div className="producthighlightinfo">
+            <span className="producthighlighttitle">Total Views</span>
+            <br />
+            <span className="producthighlightnum1">
+              {formatCount(stats.totalViews)}
+            </span>
           </div>
-          <div className='producthighlighticon2'><IoEyeOutline /></div>
+          <div className="producthighlighticon2">
+            <IoEyeOutline />
+          </div>
         </li>
-        <li className='producthighlight1'>
-          <div className='producthighlightinfo'>
-            <span className='producthighlighttitle'>Total Value</span><br />
-            <span className='producthighlightnum'>{formatCurrency(stats.totalValue)}</span>
+        <li className="producthighlight1">
+          <div className="producthighlightinfo">
+            <span className="producthighlighttitle">Total Value</span>
+            <br />
+            <span className="producthighlightnum">
+              {formatCurrency(stats.totalValue)}
+            </span>
           </div>
-          <div className='producthighlighticon3'><LuCrown /></div>
+          <div className="producthighlighticon3">
+            <LuCrown />
+          </div>
         </li>
       </ul>
 
-      <div className='productcatmain'>
-        <ul className='productcat1'>
-          <li className={`productcatname ${selectedCat === "marketplace" ? "active" : ""}`} onClick={() => setSelectedCat("marketplace")}><AiOutlineShop /> Marketplace</li>
-          <li className={`productcatname ${selectedCat === "buynow" ? "active" : ""}`} onClick={() => setSelectedCat("buynow")}><BsLightningCharge /> Buy Now</li>
-          <li className={`productcatname ${selectedCat === "auctions" ? "active" : ""}`} onClick={() => setSelectedCat("auctions")}><TbHammer /> Auctions</li>
-          <li className={`productcatname ${selectedCat === "tolet" ? "active" : ""}`} onClick={() => setSelectedCat("tolet")}><FiHome /> To-let</li>
+      <div className="productcatmain">
+        <ul className="productcat1">
+          <li
+            className={`productcatname ${selectedCat === "marketplace" ? "active" : ""}`}
+            onClick={() => setSelectedCat("marketplace")}
+          >
+            <AiOutlineShop /> Marketplace
+          </li>
+          <li
+            className={`productcatname ${selectedCat === "buynow" ? "active" : ""}`}
+            onClick={() => setSelectedCat("buynow")}
+          >
+            <BsLightningCharge /> Buy Now
+          </li>
+          <li
+            className={`productcatname ${selectedCat === "auctions" ? "active" : ""}`}
+            onClick={() => setSelectedCat("auctions")}
+          >
+            <TbHammer /> Auctions
+          </li>
+          <li
+            className={`productcatname ${selectedCat === "tolet" ? "active" : ""}`}
+            onClick={() => setSelectedCat("tolet")}
+          >
+            <FiHome /> To-let
+          </li>
         </ul>
       </div>
 
@@ -275,43 +343,79 @@ const Products = () => {
               <p>No products found for this listing type.</p>
             )}
 
-            {!isLoading && !errorMessage && productRows.map((row, rowIndex) => (
-              <div className="categoryproductrow" key={`row-${rowIndex}`}>
-                {row.map((product) => (
-                  <div
-                    className="categoryproduct"
-                    key={product.id}
-                    onClick={() => navigate(`/productpage/${product.id}`)}
-                  >
-                    <div className="producttagrow">
-                      <div className="producttagrow1">
-                        {selectedCat !== "tolet" && (
-                          <>
-                            <span className="productbusinesstag">{LISTING_LABEL_BY_TAB[selectedCat]}</span>
-                            <span className="productcattag">{CATEGORY_LABELS[product.category] || product.category}</span>
-                          </>
-                        )}
-                        {selectedCat === "tolet" && <h2 className="producattitle">{product.title}</h2>}
+            {!isLoading &&
+              !errorMessage &&
+              productRows.map((row, rowIndex) => (
+                <div className="categoryproductrow" key={`row-${rowIndex}`}>
+                  {row.map((product) => (
+                    <div
+                      className="categoryproduct"
+                      key={product.id}
+                      onClick={() =>
+                        navigate("/productpage", {
+                          state: { productId: product.id },
+                        })
+                      }
+                    >
+                      <div className="producttagrow">
+                        <div className="producttagrow1">
+                          {selectedCat !== "tolet" && (
+                            <>
+                              <span className="productbusinesstag">
+                                {LISTING_LABEL_BY_TAB[selectedCat]}
+                              </span>
+                              <span className="productcattag">
+                                {CATEGORY_LABELS[product.category] ||
+                                  product.category}
+                              </span>
+                            </>
+                          )}
+                          {selectedCat === "tolet" && (
+                            <h2 className="producattitle">{product.title}</h2>
+                          )}
+                        </div>
+                        <div className="producttaggrow2">
+                          <BsThreeDotsVertical />
+                        </div>
                       </div>
-                      <div className="producttaggrow2"><BsThreeDotsVertical /></div>
-                    </div>
 
-                    {selectedCat !== "tolet" && <h2 className="producattitle">{product.title}</h2>}
+                      {selectedCat !== "tolet" && (
+                        <h2 className="producattitle">{product.title}</h2>
+                      )}
 
-                    <span className="productcatdesc">📍 {getLocationText(product.meta)}</span>
-                    <div className="productpricetag">
-                      <h3 className="productprice">{formatCurrency(product.value)}</h3>
-                      <span className="productactivetag">{statusToLabel(product.approvalStatus)}</span>
+                      <span className="productcatdesc">
+                        📍 {getLocationText(product.meta)}
+                      </span>
+                      <div className="productpricetag">
+                        <h3 className="productprice">
+                          {formatCurrency(product.value)}
+                        </h3>
+                        <span className="productactivetag">
+                          {statusToLabel(product.approvalStatus)}
+                        </span>
+                      </div>
+                      <div className="productviewtag">
+                        <h3 className="productviews">
+                          <IoEyeOutline />
+                          {formatCount(getViews(product.meta))} views
+                        </h3>
+                        {product.tier === "LUXURY" && (
+                          <span className="producttag1">
+                            <LuCrown />
+                            Luxury
+                          </span>
+                        )}
+                        {product.tier === "CLASSIC" && (
+                          <span className="producttag2">
+                            <LiaCertificateSolid />
+                            Classic
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="productviewtag">
-                      <h3 className="productviews"><IoEyeOutline />{formatCount(getViews(product.meta))} views</h3>
-                      {product.tier === "LUXURY" && <span className="producttag1"><LuCrown />Luxury</span>}
-                      {product.tier === "CLASSIC" && <span className="producttag2"><LiaCertificateSolid />Classic</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
+                  ))}
+                </div>
+              ))}
           </div>
         </div>
       </div>

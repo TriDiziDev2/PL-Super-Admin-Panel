@@ -21,16 +21,19 @@ import AddLead from "./pages/AddLead/AddLead";
 import EmployeeDetails from "./pages/EmployeeDetails/EmployeeDetails";
 import CreateEmployee from "./pages/CreateEmployee/CreateEmployee";
 import EnquiryDetails from "./pages/EnquiryDetails/EnquiryDetails";
-
+import EmployeeDashboard from "./pages/EmloyeeDashboard/EmployeeDashboard";
+import MobileNavbar from "./components/MobileNavbar/MobileNavbar";
 
 
 const App = () => {
   return (
     <BrowserRouter>
+      <MobileNavbar />
       <Routes>
         <Route path="/login" element={getToken() ? <Navigate to="/" replace /> : <Login />} />
         <Route path='/' element={getToken() ? <LandingPage /> : <Navigate to="/login" replace />}>
           <Route index element={<DashboardPage />} />
+          <Route path='dashboard' element={<DashboardPage />} />
           <Route path='products' element={<Products />} />
           <Route path='users' element={<Users />} />
           <Route path='activity' element={<Activity />} />
