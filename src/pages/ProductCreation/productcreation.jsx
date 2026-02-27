@@ -39,6 +39,8 @@ const ProductCreation = () => {
   const marketplaceValueRef = useRef(null);
   const marketplaceStatusRef = useRef(null);
   const marketplaceTierRef = useRef(null);
+  const [propertyType, setPropertyType] = useState("");
+  const [ItemType, setItemType] = useState("");
   const [selectedMarketplaceFiles, setSelectedMarketplaceFiles] = useState([]);
   const [marketplaceFilePreviews, setMarketplaceFilePreviews] = useState([]);
   const [isMarketplaceSubmitting, setIsMarketplaceSubmitting] = useState(false);
@@ -80,7 +82,6 @@ const ProductCreation = () => {
     marketplacePreviewsRef.current = nextPreviews;
     setMarketplaceFilePreviews(nextPreviews);
 
-    // Allow selecting the same file again after removal/clear.
     event.target.value = "";
   };
 
@@ -574,6 +575,10 @@ const ProductCreation = () => {
                 <h3 className='basicinfotitle'>City</h3>
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
             </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Social Media Link</h3>
+                <input type="text" placeholder="Youtube, Instagram url" className="basicinfoinput1" />
+            </div>
         </div>
         <h3 className='basicinfotitle'>Description</h3>
         <input ref={marketplaceDescriptionRef} type="text" placeholder="Provide a detailed description of the product..." className="basicinfoinput" />
@@ -602,15 +607,15 @@ const ProductCreation = () => {
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Property Type</h3>
-                <select className="basicinfoinput2">
+                <select className="basicinfoinput2" value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>House</option>
-                    <option>Villa</option>
-                    <option>Apartment</option>
-                    <option>Flat</option>
-                    <option>Plot</option>
-                    <option>Land</option>
-                    <option>Commercial</option>
+                    <option value="House">House</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Flat">Flat</option>
+                    <option value="Plot">Plot</option>
+                    <option value="Land">Land</option>
+                    <option value="Commercial">Commercial</option>
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
@@ -683,6 +688,464 @@ const ProductCreation = () => {
                     <option>4</option>
                 </select>
          </div> 
+         {propertyType === "House" && (<div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Garden</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Gated Community</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            </div>
+        )}
+        {propertyType === "Villa" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Garden</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Gated Community</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div></div>)}
+        {propertyType === "Apartment" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor Number</h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Total Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Society Name</h3>
+                <input type="text" placeholder="e.g., My Home Booja" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Maintenance Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded </option>
+                    <option>On Request</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Lift</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Amenities  </h3>
+                <input type="text" placeholder="e.g., Gym, Pool" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Balcony Count</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>No</option>
+                    <option>Open</option>
+                    <option>Covered</option>
+                </select>
+            </div> 
+            </div>
+            </div>)}
+        {propertyType === "Flat" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor Number</h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Total Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Society Name</h3>
+                <input type="text" placeholder="e.g., My Home Booja" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Maintenance Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded </option>
+                    <option>On Request</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Lift</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Amenities  </h3>
+                <input type="text" placeholder="e.g., Gym, Pool" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Balcony Count</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>No</option>
+                    <option>Open</option>
+                    <option>Covered</option>
+                </select>
+            </div> 
+            </div>
+            </div>)}
+        {propertyType === "Plot" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Dimensions</h3>
+                <input type="text" placeholder="e.g., 300 x 400" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Facing</h3>
+                <input type="text" placeholder="e.g., North" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Road Width</h3>
+                <input type="text" placeholder="e.g., 20 ft" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Approval Type </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>DTCP</option>
+                    <option>HMDA</option>
+                    <option>RERA</option>
+                    <option>Panchayat </option>
+                    <option>NA</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Boundary Wall </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Corner Plot</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Electricity Available</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Water Connection </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Muncipal</option>
+                    <option>Borewell</option>
+                    <option>Both</option>
+                    <option>None </option>
+                </select>
+            </div>
+            </div>
+            </div>)}
+        {propertyType === "Land" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Dimensions</h3>
+                <input type="text" placeholder="e.g., 300 x 400" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Facing</h3>
+                <input type="text" placeholder="e.g., North" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Road Width</h3>
+                <input type="text" placeholder="e.g., 20 ft" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Approval Type </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>DTCP</option>
+                    <option>HMDA</option>
+                    <option>RERA</option>
+                    <option>Panchayat </option>
+                    <option>NA</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Boundary Wall </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Corner Plot</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Electricity Available</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Water Connection </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Muncipal</option>
+                    <option>Borewell</option>
+                    <option>Both</option>
+                    <option>None </option>
+                </select>
+            </div>
+            </div></div>)}
+        {propertyType === "Commercial" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Commercial Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Office</option>
+                    <option>Shop</option>
+                    <option>Showroom</option>
+                    <option>Warehouse</option>
+                    <option>Industrial</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Suitable For </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Office</option>
+                    <option>Retail </option>
+                    <option>Clinic</option>
+                    <option>Restaurant</option>
+                    <option>Storage</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Washroom</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Private</option>
+                    <option>Common </option>
+                    <option>None</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Power Load</h3>
+                <input type="text" placeholder="e.g., 5 KW" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnished Status</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Fire Safety Compliance</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div></div>
+            </div>)}
     </div>
     }
     {activeTab === "cars" && <div className='basiccarinputs'>
@@ -1034,7 +1497,7 @@ const ProductCreation = () => {
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Original Purchase Price (₹, Optional)</h3>
+                <h3 className='basicinfotitle'>Original Purchase Price</h3>
                 <input type="text" placeholder="e.g., 45,000" className="basicinfoinput2" />
             </div> 
             <div className='basicinfoinputdiv'>
@@ -1066,10 +1529,10 @@ const ProductCreation = () => {
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Item Type</h3>
-                <select className="basicinfoinput2">
+                <select className="basicinfoinput2" value={ItemType} onChange={(e) => setItemType(e.target.value)}>
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>Jewellery</option>
-                    <option>Watch</option>
+                    <option value="Jewellery">Jewellery</option>
+                    <option value="Watch">Watch</option>
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
@@ -1098,19 +1561,199 @@ const ProductCreation = () => {
                 </select>
             </div>  
         </div>
+        {ItemType === "Jewellery" && (<div><div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Ring</option>
+                    <option>Necklace</option>
+                    <option>Bracelet</option>
+                    <option>Earrings</option>
+                    <option>Bangles</option>
+                    <option>Chain Sets</option>
+                    <option>Ear Studs</option>
+                    <option>Custom</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Material</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Gold</option>
+                    <option>Silver</option>
+                    <option>Platinum</option>
+                    <option>Diamond</option>
+                    <option>Mixed</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Weight</h3>
+                <input type="text" placeholder="e.g., 10g" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Purity</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>18K</option>
+                    <option>20K</option>
+                    <option>22K</option>
+                    <option>24K</option>
+                </select>
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Certification</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>BIS</option>
+                    <option>GIA</option>
+                    <option>IGI</option>
+                    <option>Others</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Making Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Hallmark Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>BIS</option>
+                    <option>International</option>
+                    <option>Others</option>
+                </select>
+            </div>  
+        </div>
+        </div>)}
+        {ItemType === "Watch" && (<div><div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Brand</h3>
+                <input type="text" placeholder="e.g., Rolex" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Model</h3>
+                <input type="text" placeholder="e.g., X100" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Dial Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Analog</option>
+                    <option>Digital </option>
+                    <option>Automatic</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Strap Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Leather</option>
+                    <option>Metal</option>
+                    <option>Rubber</option>
+                    <option>Fabric</option>
+                </select>
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Box & Pappers</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Available</option>
+                    <option>Not Available</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Year of Purchase</h3>
+                <input type="text" placeholder="e.g., 2024" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Working Condition</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Working</option>
+                    <option>Needs Repair</option>
+                </select>
+            </div>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Original Parts</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+        </div></div>)}
     </div>}
     {activeTab === "arts" && <div className='basicjewelinputs'>
         <h3 className='basicinfotitle'>Arts & Paintings Details</h3>
         <span className='basicinfodesc'>Item specific information</span>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Product Type</h3>
+                <h3 className='basicinfotitle'>Art Type</h3>
                 <select className="basicinfoinput2">
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>Art</option>
+                    <option>Sculpture</option>
                     <option>Painting</option>
+                    <option>Print</option>
+                    <option>Digital</option>
                 </select>
             </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Artist Name</h3>
+                <input type="text" placeholder="e.g., Monica" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Medium</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Oil</option>
+                    <option>Arcylic</option>
+                    <option>Watercolor</option>
+                    <option>Mixed</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Size</h3>
+                <input type="text" placeholder="e.g., 4ft" className="basicinfoinput2" />
+            </div>
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Year Created</h3>
+                <input type="text" placeholder="e.g., 2024" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Signed</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Certificate</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Framed</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
         </div>
     </div>}
     {activeTab === "antiques" && <div className='basicantiqueinputs'>
@@ -1183,9 +1826,54 @@ const ProductCreation = () => {
         <span className='basicinfodesc'>Collectable specific information</span>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Product Type</h3>
+                <h3 className='basicinfotitle'>Item Type</h3>
                 <input type="text" placeholder="Enter Type" className="basicinfoinput2" />
             </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Rarety Level</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Common</option>
+                    <option>Rare</option>
+                    <option>Very Rare</option>
+                    <option>One-of-One</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Limited Edition</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Serial Number</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Available</option>
+                    <option>Not Available</option>
+                </select>
+            </div> 
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Authentication</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Condition Grade</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Fair</option>
+                    <option>Excellent</option>
+                    <option>Mint</option>
+                </select>
+            </div>  
         </div>
     </div>}
     {activeTab === "others" && <div className='basicantiqueinputs'>
@@ -1358,6 +2046,10 @@ const ProductCreation = () => {
                 <h3 className='basicinfotitle'>City</h3>
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
             </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Social Media Link</h3>
+                <input type="text" placeholder="Youtube, Instagram url" className="basicinfoinput1" />
+            </div>
         </div>
         <h3 className='basicinfotitle'>Description</h3>
         <input type="text" placeholder="Provide a detailed description of the product..." className="basicinfoinput" />
@@ -1369,15 +2061,15 @@ const ProductCreation = () => {
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Property Type</h3>
-                <select className="basicinfoinput2">
+                <select className="basicinfoinput2" value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>House</option>
-                    <option>Villa</option>
-                    <option>Apartment</option>
-                    <option>Flat</option>
-                    <option>Plot</option>
-                    <option>Land</option>
-                    <option>Commercial</option>
+                    <option value="House">House</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Flat">Flat</option>
+                    <option value="Plot">Plot</option>
+                    <option value="Land">Land</option>
+                    <option value="Commercial">Commercial</option>
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
@@ -1450,6 +2142,464 @@ const ProductCreation = () => {
                     <option>4</option>
                 </select>
          </div> 
+         {propertyType === "House" && (<div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Garden</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Gated Community</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            </div>
+        )}
+        {propertyType === "Villa" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Garden</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Gated Community</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div></div>)}
+        {propertyType === "Apartment" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor Number</h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Total Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Society Name</h3>
+                <input type="text" placeholder="e.g., My Home Booja" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Maintenance Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded </option>
+                    <option>On Request</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Lift</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Amenities  </h3>
+                <input type="text" placeholder="e.g., Gym, Pool" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Balcony Count</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>No</option>
+                    <option>Open</option>
+                    <option>Covered</option>
+                </select>
+            </div> 
+            </div>
+            </div>)}
+        {propertyType === "Flat" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor Number</h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Total Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Society Name</h3>
+                <input type="text" placeholder="e.g., My Home Booja" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Maintenance Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded </option>
+                    <option>On Request</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Lift</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Amenities  </h3>
+                <input type="text" placeholder="e.g., Gym, Pool" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Balcony Count</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>No</option>
+                    <option>Open</option>
+                    <option>Covered</option>
+                </select>
+            </div> 
+            </div>
+            </div>)}
+        {propertyType === "Plot" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Dimensions</h3>
+                <input type="text" placeholder="e.g., 300 x 400" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Facing</h3>
+                <input type="text" placeholder="e.g., North" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Road Width</h3>
+                <input type="text" placeholder="e.g., 20 ft" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Approval Type </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>DTCP</option>
+                    <option>HMDA</option>
+                    <option>RERA</option>
+                    <option>Panchayat </option>
+                    <option>NA</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Boundary Wall </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Corner Plot</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Electricity Available</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Water Connection </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Muncipal</option>
+                    <option>Borewell</option>
+                    <option>Both</option>
+                    <option>None </option>
+                </select>
+            </div>
+            </div>
+            </div>)}
+        {propertyType === "Land" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Dimensions</h3>
+                <input type="text" placeholder="e.g., 300 x 400" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Facing</h3>
+                <input type="text" placeholder="e.g., North" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Road Width</h3>
+                <input type="text" placeholder="e.g., 20 ft" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Approval Type </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>DTCP</option>
+                    <option>HMDA</option>
+                    <option>RERA</option>
+                    <option>Panchayat </option>
+                    <option>NA</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Boundary Wall </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Corner Plot</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Electricity Available</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Water Connection </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Muncipal</option>
+                    <option>Borewell</option>
+                    <option>Both</option>
+                    <option>None </option>
+                </select>
+            </div>
+            </div></div>)}
+        {propertyType === "Commercial" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Commercial Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Office</option>
+                    <option>Shop</option>
+                    <option>Showroom</option>
+                    <option>Warehouse</option>
+                    <option>Industrial</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Suitable For </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Office</option>
+                    <option>Retail </option>
+                    <option>Clinic</option>
+                    <option>Restaurant</option>
+                    <option>Storage</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Washroom</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Private</option>
+                    <option>Common </option>
+                    <option>None</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Power Load</h3>
+                <input type="text" placeholder="e.g., 5 KW" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnished Status</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Fire Safety Compliance</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div></div>
+            </div>)}
     </div>
     }
     {activeTab === "cars" && <div className='basiccarinputs'>
@@ -1801,7 +2951,7 @@ const ProductCreation = () => {
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Original Purchase Price (₹, Optional)</h3>
+                <h3 className='basicinfotitle'>Original Purchase Price</h3>
                 <input type="text" placeholder="e.g., 45,000" className="basicinfoinput2" />
             </div> 
             <div className='basicinfoinputdiv'>
@@ -1833,10 +2983,10 @@ const ProductCreation = () => {
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Item Type</h3>
-                <select className="basicinfoinput2">
+                <select className="basicinfoinput2" value={ItemType} onChange={(e) => setItemType(e.target.value)}>
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>Jewellery</option>
-                    <option>Watch</option>
+                    <option value="Jewellery">Jewellery</option>
+                    <option value="Watch">Watch</option>
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
@@ -1865,19 +3015,199 @@ const ProductCreation = () => {
                 </select>
             </div>  
         </div>
+        {ItemType === "Jewellery" && (<div><div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Ring</option>
+                    <option>Necklace</option>
+                    <option>Bracelet</option>
+                    <option>Earrings</option>
+                    <option>Bangles</option>
+                    <option>Chain Sets</option>
+                    <option>Ear Studs</option>
+                    <option>Custom</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Material</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Gold</option>
+                    <option>Silver</option>
+                    <option>Platinum</option>
+                    <option>Diamond</option>
+                    <option>Mixed</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Weight</h3>
+                <input type="text" placeholder="e.g., 10g" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Purity</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>18K</option>
+                    <option>20K</option>
+                    <option>22K</option>
+                    <option>24K</option>
+                </select>
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Certification</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>BIS</option>
+                    <option>GIA</option>
+                    <option>IGI</option>
+                    <option>Others</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Making Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Hallmark Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>BIS</option>
+                    <option>International</option>
+                    <option>Others</option>
+                </select>
+            </div>  
+        </div>
+        </div>)}
+        {ItemType === "Watch" && (<div><div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Brand</h3>
+                <input type="text" placeholder="e.g., Rolex" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Model</h3>
+                <input type="text" placeholder="e.g., X100" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Dial Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Analog</option>
+                    <option>Digital </option>
+                    <option>Automatic</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Strap Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Leather</option>
+                    <option>Metal</option>
+                    <option>Rubber</option>
+                    <option>Fabric</option>
+                </select>
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Box & Pappers</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Available</option>
+                    <option>Not Available</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Year of Purchase</h3>
+                <input type="text" placeholder="e.g., 2024" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Working Condition</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Working</option>
+                    <option>Needs Repair</option>
+                </select>
+            </div>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Original Parts</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+        </div></div>)}
     </div>}
     {activeTab === "arts" && <div className='basicjewelinputs'>
         <h3 className='basicinfotitle'>Arts & Paintings Details</h3>
         <span className='basicinfodesc'>Item specific information</span>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Product Type</h3>
+                <h3 className='basicinfotitle'>Art Type</h3>
                 <select className="basicinfoinput2">
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>Art</option>
+                    <option>Sculpture</option>
                     <option>Painting</option>
+                    <option>Print</option>
+                    <option>Digital</option>
                 </select>
             </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Artist Name</h3>
+                <input type="text" placeholder="e.g., Monica" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Medium</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Oil</option>
+                    <option>Arcylic</option>
+                    <option>Watercolor</option>
+                    <option>Mixed</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Size</h3>
+                <input type="text" placeholder="e.g., 4ft" className="basicinfoinput2" />
+            </div>
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Year Created</h3>
+                <input type="text" placeholder="e.g., 2024" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Signed</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Certificate</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Framed</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
         </div>
     </div>}
     {activeTab === "antiques" && <div className='basicantiqueinputs'>
@@ -1950,9 +3280,54 @@ const ProductCreation = () => {
         <span className='basicinfodesc'>Collectable specific information</span>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Product Type</h3>
+                <h3 className='basicinfotitle'>Item Type</h3>
                 <input type="text" placeholder="Enter Type" className="basicinfoinput2" />
             </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Rarety Level</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Common</option>
+                    <option>Rare</option>
+                    <option>Very Rare</option>
+                    <option>One-of-One</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Limited Edition</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Serial Number</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Available</option>
+                    <option>Not Available</option>
+                </select>
+            </div> 
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Authentication</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Condition Grade</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Fair</option>
+                    <option>Excellent</option>
+                    <option>Mint</option>
+                </select>
+            </div>  
         </div>
     </div>}
     {activeTab === "others" && <div className='basicantiqueinputs'>
@@ -2116,6 +3491,10 @@ const ProductCreation = () => {
                 <h3 className='basicinfotitle'>City</h3>
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
             </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Social Media Link</h3>
+                <input type="text" placeholder="Youtube, Instagram url" className="basicinfoinput1" />
+            </div>
         </div>
         <h3 className='basicinfotitle'>Description</h3>
         <input type="text" placeholder="Provide a detailed description of the product..." className="basicinfoinput" />
@@ -2127,15 +3506,15 @@ const ProductCreation = () => {
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Property Type</h3>
-                <select className="basicinfoinput2">
+                <select className="basicinfoinput2" value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>House</option>
-                    <option>Villa</option>
-                    <option>Apartment</option>
-                    <option>Flat</option>
-                    <option>Plot</option>
-                    <option>Land</option>
-                    <option>Commercial</option>
+                    <option value="House">House</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Flat">Flat</option>
+                    <option value="Plot">Plot</option>
+                    <option value="Land">Land</option>
+                    <option value="Commercial">Commercial</option>
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
@@ -2208,6 +3587,464 @@ const ProductCreation = () => {
                     <option>4</option>
                 </select>
          </div> 
+         {propertyType === "House" && (<div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Garden</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Gated Community</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            </div>
+        )}
+        {propertyType === "Villa" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Garden</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Gated Community</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div></div>)}
+        {propertyType === "Apartment" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor Number</h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Total Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Society Name</h3>
+                <input type="text" placeholder="e.g., My Home Booja" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Maintenance Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded </option>
+                    <option>On Request</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Lift</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Amenities  </h3>
+                <input type="text" placeholder="e.g., Gym, Pool" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Balcony Count</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>No</option>
+                    <option>Open</option>
+                    <option>Covered</option>
+                </select>
+            </div> 
+            </div>
+            </div>)}
+        {propertyType === "Flat" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor Number</h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Total Floors </h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnishing </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Society Name</h3>
+                <input type="text" placeholder="e.g., My Home Booja" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Maintenance Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded </option>
+                    <option>On Request</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Lift</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Amenities  </h3>
+                <input type="text" placeholder="e.g., Gym, Pool" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Balcony Count</h3>
+                <input type="text" placeholder="e.g., 2" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>No</option>
+                    <option>Open</option>
+                    <option>Covered</option>
+                </select>
+            </div> 
+            </div>
+            </div>)}
+        {propertyType === "Plot" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Dimensions</h3>
+                <input type="text" placeholder="e.g., 300 x 400" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Facing</h3>
+                <input type="text" placeholder="e.g., North" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Road Width</h3>
+                <input type="text" placeholder="e.g., 20 ft" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Approval Type </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>DTCP</option>
+                    <option>HMDA</option>
+                    <option>RERA</option>
+                    <option>Panchayat </option>
+                    <option>NA</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Boundary Wall </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Corner Plot</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Electricity Available</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Water Connection </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Muncipal</option>
+                    <option>Borewell</option>
+                    <option>Both</option>
+                    <option>None </option>
+                </select>
+            </div>
+            </div>
+            </div>)}
+        {propertyType === "Land" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Dimensions</h3>
+                <input type="text" placeholder="e.g., 300 x 400" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Plot Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Facing</h3>
+                <input type="text" placeholder="e.g., North" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Road Width</h3>
+                <input type="text" placeholder="e.g., 20 ft" className="basicinfoinput2" />
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Approval Type </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>DTCP</option>
+                    <option>HMDA</option>
+                    <option>RERA</option>
+                    <option>Panchayat </option>
+                    <option>NA</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Boundary Wall </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Corner Plot</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Electricity Available</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Water Connection </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Muncipal</option>
+                    <option>Borewell</option>
+                    <option>Both</option>
+                    <option>None </option>
+                </select>
+            </div>
+            </div></div>)}
+        {propertyType === "Commercial" && (<div><div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Commercial Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Office</option>
+                    <option>Shop</option>
+                    <option>Showroom</option>
+                    <option>Warehouse</option>
+                    <option>Industrial</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 1200 sq.ft" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Floor</h3>
+                <input type="text" placeholder="e.g., 3" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Parking</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Suitable For </h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Office</option>
+                    <option>Retail </option>
+                    <option>Clinic</option>
+                    <option>Restaurant</option>
+                    <option>Storage</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Washroom</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Private</option>
+                    <option>Common </option>
+                    <option>None</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Power Load</h3>
+                <input type="text" placeholder="e.g., 5 KW" className="basicinfoinput2" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnished Status</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Furnished</option>
+                </select>
+            </div> 
+            </div>
+            <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Fire Safety Compliance</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div></div>
+            </div>)}
     </div>
     }
     {activeTab === "cars" && <div className='basiccarinputs'>
@@ -2559,7 +4396,7 @@ const ProductCreation = () => {
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Original Purchase Price (₹, Optional)</h3>
+                <h3 className='basicinfotitle'>Original Purchase Price</h3>
                 <input type="text" placeholder="e.g., 45,000" className="basicinfoinput2" />
             </div> 
             <div className='basicinfoinputdiv'>
@@ -2591,10 +4428,10 @@ const ProductCreation = () => {
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Item Type</h3>
-                <select className="basicinfoinput2">
+                <select className="basicinfoinput2" value={ItemType} onChange={(e) => setItemType(e.target.value)}>
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>Jewellery</option>
-                    <option>Watch</option>
+                    <option value="Jewellery">Jewellery</option>
+                    <option value="Watch">Watch</option>
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
@@ -2623,19 +4460,199 @@ const ProductCreation = () => {
                 </select>
             </div>  
         </div>
+        {ItemType === "Jewellery" && (<div><div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Ring</option>
+                    <option>Necklace</option>
+                    <option>Bracelet</option>
+                    <option>Earrings</option>
+                    <option>Bangles</option>
+                    <option>Chain Sets</option>
+                    <option>Ear Studs</option>
+                    <option>Custom</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Material</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Gold</option>
+                    <option>Silver</option>
+                    <option>Platinum</option>
+                    <option>Diamond</option>
+                    <option>Mixed</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Weight</h3>
+                <input type="text" placeholder="e.g., 10g" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Purity</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>18K</option>
+                    <option>20K</option>
+                    <option>22K</option>
+                    <option>24K</option>
+                </select>
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Certification</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>BIS</option>
+                    <option>GIA</option>
+                    <option>IGI</option>
+                    <option>Others</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Making Charges</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Included</option>
+                    <option>Excluded</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Hallmark Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>BIS</option>
+                    <option>International</option>
+                    <option>Others</option>
+                </select>
+            </div>  
+        </div>
+        </div>)}
+        {ItemType === "Watch" && (<div><div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Brand</h3>
+                <input type="text" placeholder="e.g., Rolex" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Model</h3>
+                <input type="text" placeholder="e.g., X100" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Dial Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Analog</option>
+                    <option>Digital </option>
+                    <option>Automatic</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Strap Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Leather</option>
+                    <option>Metal</option>
+                    <option>Rubber</option>
+                    <option>Fabric</option>
+                </select>
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Box & Pappers</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Available</option>
+                    <option>Not Available</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Year of Purchase</h3>
+                <input type="text" placeholder="e.g., 2024" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Working Condition</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Working</option>
+                    <option>Needs Repair</option>
+                </select>
+            </div>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Original Parts</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+        </div></div>)}
     </div>}
     {activeTab === "arts" && <div className='basicjewelinputs'>
         <h3 className='basicinfotitle'>Arts & Paintings Details</h3>
         <span className='basicinfodesc'>Item specific information</span>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Product Type</h3>
+                <h3 className='basicinfotitle'>Art Type</h3>
                 <select className="basicinfoinput2">
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>Art</option>
+                    <option>Sculpture</option>
                     <option>Painting</option>
+                    <option>Print</option>
+                    <option>Digital</option>
                 </select>
             </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Artist Name</h3>
+                <input type="text" placeholder="e.g., Monica" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Medium</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Oil</option>
+                    <option>Arcylic</option>
+                    <option>Watercolor</option>
+                    <option>Mixed</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Size</h3>
+                <input type="text" placeholder="e.g., 4ft" className="basicinfoinput2" />
+            </div>
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Year Created</h3>
+                <input type="text" placeholder="e.g., 2024" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Signed</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Certificate</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Framed</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
         </div>
     </div>}
     {activeTab === "antiques" && <div className='basicantiqueinputs'>
@@ -2708,9 +4725,54 @@ const ProductCreation = () => {
         <span className='basicinfodesc'>Collectable specific information</span>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Product Type</h3>
+                <h3 className='basicinfotitle'>Item Type</h3>
                 <input type="text" placeholder="Enter Type" className="basicinfoinput2" />
             </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Rarety Level</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Common</option>
+                    <option>Rare</option>
+                    <option>Very Rare</option>
+                    <option>One-of-One</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Limited Edition</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Serial Number</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Available</option>
+                    <option>Not Available</option>
+                </select>
+            </div> 
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Authentication</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Condition Grade</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Fair</option>
+                    <option>Excellent</option>
+                    <option>Mint</option>
+                </select>
+            </div>  
         </div>
     </div>}
     {activeTab === "others" && <div className='basicantiqueinputs'>
@@ -2859,12 +4921,16 @@ const ProductCreation = () => {
         <input type="text" placeholder="e.g., Luxury 4BHK Penthouse in South Mumbai" className="basicinfoinput" />
         <div className='basicinforow'>
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Title</h3>
+                <h3 className='basicinfotitle'>Rent</h3>
                 <input type="text" placeholder="e.g., 5,50,00,000" className="basicinfoinput1" />
             </div>
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>City</h3>
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Social Media Link</h3>
+                <input type="text" placeholder="Youtube, Instagram url" className="basicinfoinput1" />
             </div>
         </div>
         <h3 className='basicinfotitle'>Description</h3>
@@ -2876,35 +4942,89 @@ const ProductCreation = () => {
         <span className='basicinfodesc'>Property rental configuration</span>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Rent per Month (₹)</h3>
-                <input type="text" placeholder="e.g., 2,50,000" className="basicinfoinput4" />
+                <h3 className='basicinfotitle'>Ownership</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Owner</option>
+                    <option>Agent</option>
+                    <option>Builder</option>
+                </select>
             </div> 
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Security Deposit (₹)</h3>
-                <input type="text" placeholder="e.g., 5,00,000" className="basicinfoinput4" />
+                <h3 className='basicinfotitle'>Rental Type</h3>
+                <select className="basicinfoinput2">
+                    <option value="">Select type<FaChevronDown /></option>
+                    <option>Flat</option>
+                    <option>Apartment</option>
+                    <option>Independent House</option>
+                    <option>Villa</option>
+                    <option>Studio</option>
+                    <option>Penthouse</option>
+                </select>
             </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bedrooms</h3>
+                <input type="text" placeholder="e.g., 2021" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Bathrooms</h3>
+                <input type="text" placeholder="e.g., 2021" className="basicinfoinput2" />
+            </div>  
         </div>
         <div className='basicinforow'>  
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Lease Duration</h3>
-                <select className="basicinfoinput4">
+                <h3 className='basicinfotitle'>Property Floor</h3>
+                <input type="text" placeholder="e.g., 4" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Total No of Floors</h3>
+                <input type="text" placeholder="e.g., 10" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Carpet Area</h3>
+                <input type="text" placeholder="e.g., 3000 sft" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Built-up Area</h3>
+                <input type="text" placeholder="e.g., 2500 sft" className="basicinfoinput2" />
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Facing</h3>
+                <input type="text" placeholder="e.g., North" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Maintenance Charges</h3>
+                <input type="text" placeholder="e.g., 10,000" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Available From</h3>
+                <input type="text" placeholder="e.g., 01/03/2026" className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Preferred Tenants</h3>
+                <input type="text" placeholder="e.g., Families" className="basicinfoinput2" />
+            </div>  
+        </div>
+        <div className='basicinforow'>  
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Furnished Status</h3>
+                <select className="basicinfoinput2">
                     <option value="">Select type<FaChevronDown /></option>
-                    <option>11 Months</option>
-                    <option>1 Year</option>
-                    <option>2 Years</option>
-                    <option>3 Years</option>
+                    <option>Fully - Furnished</option>
+                    <option>Unfurnished</option>
+                    <option>Semi-Furnished</option>
                 </select>
             </div> 
             <div className='basicinfoinputdiv'>
-                <h3 className='basicinfotitle'>Furnishing Status</h3>
-                <select className="basicinfoinput4">
-                    <option value="">Select type<FaChevronDown /></option>
-                    <option>Furnished</option>
-                    <option>Semi Furnished</option>
-                    <option>Unfurnished</option>
-                    <option>Other</option>
-                </select>
-            </div>  
+                <h3 className='basicinfotitle'>Furnishing Items</h3>
+                <input type="text" placeholder="e.g., Sofa, TV," className="basicinfoinput2" />
+            </div> 
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Society Amenities</h3>
+                <input type="text" placeholder="e.g., Lift, Power Backup" className="basicinfoinput2" />
+            </div> 
         </div>
     </div>
     }

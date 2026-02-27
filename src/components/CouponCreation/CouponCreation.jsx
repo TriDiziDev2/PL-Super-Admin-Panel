@@ -7,7 +7,6 @@ export default function CouponCreation({ onClose }) {
     <div className="coupon-overlay">
       <div className="coupon-modal">
         
-        {/* Header */}
         <div className="coupon-header">
           <div>
             <h2>Create New Coupon</h2>
@@ -16,7 +15,6 @@ export default function CouponCreation({ onClose }) {
           <FiX className="close-icon" onClick={onClose} />
         </div>
 
-        {/* Scrollable Body */}
         <div className="coupon-body">
           <form className="coupon-form">
             
@@ -71,7 +69,6 @@ export default function CouponCreation({ onClose }) {
           </form>
         </div>
 
-        {/* Footer */}
         <div className="coupon-footer">
           <button className="cancel-btn" onClick={onClose}>
             Cancel
