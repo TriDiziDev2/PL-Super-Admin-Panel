@@ -31,6 +31,13 @@ const LISTING_TYPE_BY_TAB = {
   tolet: "TO_LET",
 };
 
+const CREATE_ROUTE_BY_TAB = {
+  marketplace: "/productcreation/marketplace",
+  buynow: "/productcreation/buynow",
+  auctions: "/productcreation/auction",
+  tolet: "/productcreation/tolet",
+};
+
 const LISTING_LABEL_BY_TAB = {
   marketplace: "Marketplace",
   buynow: "Buy Now",
@@ -232,7 +239,7 @@ const Products = () => {
         </div>
         <button
           className="addproduct"
-          onClick={() => navigate("/productcreation")}
+          onClick={() => navigate(CREATE_ROUTE_BY_TAB[selectedCat] || "/productcreation")}
         >
           <FaPlus />
           Add Product
@@ -351,11 +358,7 @@ const Products = () => {
                     <div
                       className="categoryproduct"
                       key={product.id}
-                      onClick={() =>
-                        navigate("/productpage", {
-                          state: { productId: product.id },
-                        })
-                      }
+                      onClick={() => navigate(`/productpage/${product.id}`)}
                     >
                       <div className="producttagrow">
                         <div className="producttagrow1">

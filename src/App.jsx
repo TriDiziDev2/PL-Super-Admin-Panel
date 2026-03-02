@@ -43,6 +43,7 @@ const App = () => {
           <Route path='enquiries' element={<Enquiries />} />
           <Route path='settings' element={<Settings />} />
           <Route path='productcreation' element={<ProductCreation/>} />
+          <Route path='productcreation/:mode' element={<ProductCreation/>} />
           <Route path='productpage/:id' element={<ProductPage/>} />
           <Route path='productedit/:id' element={<ProductEdit/>} />
           <Route path="create-user" element={<CreateNewUser />} />
