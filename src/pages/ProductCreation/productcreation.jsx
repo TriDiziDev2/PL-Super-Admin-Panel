@@ -3550,6 +3550,16 @@ const ProductCreation = () => {
                 <input type="text" placeholder="Youtube, Instagram url" className="basicinfoinput1" />
             </div>
         </div>
+        <div className='basicinforow'>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Auction Venue</h3>
+                <input type='text' placeholder='e.g., Taj Palace, Mumbai' className='basicinfoinput1' />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Auction Date</h3>
+                <input type='date' className='basicinfoinput1' />
+            </div>
+        </div>
         <h3 className='basicinfotitle'>Description</h3>
         <input type="text" placeholder="Provide a detailed description of the product..." className="basicinfoinput" />
     </div>

@@ -1,4 +1,5 @@
 import './Dashboard.css';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoCubeOutline } from 'react-icons/io5';
 import { MdArrowOutward } from 'react-icons/md';
@@ -27,8 +28,103 @@ import { LuAward } from 'react-icons/lu';
 import { LuCrown } from 'react-icons/lu';
 import { RiCoupon3Line } from 'react-icons/ri';
 
+import api from '../../lib/api';
+import { getUsers } from '../../lib/users';
+import { getEnquiryStats } from '../../lib/enquiries';
+import { getEmployees } from '../../lib/employees';
+
+const categoryIcons = {
+  REAL_ESTATE: <FiHome />,
+  CARS: <FaCarSide />,
+  FURNITURE: <RiSofaFill />,
+  JEWELLERY_AND_WATCHES: <FiWatch />,
+  ARTS_AND_PAINTINGS: <PiPaintBrushBold />,
+  ANTIQUES: <BsBank />,
+  COLLECTABLES: <GoTrophy />,
+};
+
+const categoryLabels = {
+  REAL_ESTATE: 'Real Estate',
+  CARS: 'Cars',
+  FURNITURE: 'Furniture',
+  JEWELLERY_AND_WATCHES: 'Jewellery & Watches',
+  ARTS_AND_PAINTINGS: 'Arts & Paintings',
+  ANTIQUES: 'Antiques',
+  COLLECTABLES: 'Collectables',
+};
+
+const catStyleIndex = ['', '1', '2', '3', '4', '5', '6', '7'];
+
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalUsers: 0,
+    activeLeads: 0,
+    totalEmployees: 0,
+    pendingApprovals: 0,
+    featuredCount: 0,
+    recommendedCount: 0,
+    auctionCount: 0,
+    categoryCounts: {},
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [productsRes, usersRes, enquiryStats, employeesRes, pendingRes, featuredRes, recommendedRes, auctionRes] = await Promise.all([
+          api.get('/api/product').catch(() => ({ data: { data: [] } })),
+          getUsers().catch(() => ({ data: [] })),
+          getEnquiryStats().catch(() => ({})),
+          getEmployees().catch(() => ({ data: [] })),
+          api.get('/api/product', { params: { approvalStatus: 'PENDING' } }).catch(() => ({ data: { data: [] } })),
+          api.get('/api/product', { params: { isFeatured: 'true', approvalStatus: 'APPROVED' } }).catch(() => ({ data: { data: [] } })),
+          api.get('/api/product', { params: { isRecommended: 'true', approvalStatus: 'APPROVED' } }).catch(() => ({ data: { data: [] } })),
+          api.get('/api/product', { params: { approvalStatus: 'APPROVED' } }).catch(() => ({ data: { data: [] } })),
+        ]);
+
+        const allProducts = productsRes.data?.data || [];
+        const users = usersRes.data || [];
+        const employees = employeesRes.data || [];
+        const pending = pendingRes.data?.data || [];
+        const featured = featuredRes.data?.data || [];
+        const recommended = recommendedRes.data?.data || [];
+        const approved = auctionRes.data?.data || [];
+        const auctions = approved.filter(p => p.listingType === 'AUCTIONS');
+
+        const totalNewEnquiries = enquiryStats?.byStatus?.NEW || 0;
+        const totalInProgress = enquiryStats?.byStatus?.IN_PROGRESS || 0;
+
+        const categoryCounts = {};
+        allProducts.forEach(p => {
+          categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+        });
+
+        setStats({
+          totalProducts: allProducts.length,
+          totalUsers: users.length,
+          activeLeads: totalNewEnquiries + totalInProgress,
+          totalEmployees: employees.length,
+          pendingApprovals: pending.length,
+          featuredCount: featured.length,
+          recommendedCount: recommended.length,
+          auctionCount: auctions.length,
+          categoryCounts,
+        });
+      } catch (err) {
+        console.error('Dashboard data fetch error', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const fmt = (n) => (loading ? '...' : n.toLocaleString('en-IN'));
+
+  const categoryEntries = Object.entries(categoryLabels);
 
   return (
     <div className='dashboardcontainer'>
@@ -48,9 +144,9 @@ const DashboardPage = () => {
               <IoCubeOutline />
             </span>
           </div>
-          <h2>16,234</h2>
+          <h2>{fmt(stats.totalProducts)}</h2>
           <div className='dashgrowth'>
-            <MdArrowOutward /> +18.2% from last month
+            <MdArrowOutward /> View all products
           </div>
         </div>
         <div className='dashinsight1' onClick={() => navigate('/users')}>
@@ -60,21 +156,21 @@ const DashboardPage = () => {
               <LuUsers />
             </span>
           </div>
-          <h2>8,956</h2>
+          <h2>{fmt(stats.totalUsers)}</h2>
           <div className='dashgrowth'>
-            <MdArrowOutward /> +14.8% from last month
+            <MdArrowOutward /> View all users
           </div>
         </div>
-        <div className='dashinsight2' onClick={() => navigate('/leads')}>
+        <div className='dashinsight2' onClick={() => navigate('/enquiries')}>
           <div className='dashinsightrow'>
             <p>Active Leads</p>
             <span>
               <LuTarget />
             </span>
           </div>
-          <h2>1,456</h2>
+          <h2>{fmt(stats.activeLeads)}</h2>
           <div className='dashgrowth'>
-            <MdArrowOutward /> +26.4% from last month
+            <MdArrowOutward /> New + In Progress enquiries
           </div>
         </div>
         <div className='dashinsight3' onClick={() => navigate('/financials')}>
@@ -84,9 +180,9 @@ const DashboardPage = () => {
               <BsCurrencyRupee />
             </span>
           </div>
-          <h2>₹2.8Cr</h2>
+          <h2>—</h2>
           <div className='dashgrowth'>
-            <MdArrowOutward /> +18.7% from last month
+            <MdArrowOutward /> Coming soon
           </div>
         </div>
       </div>
@@ -96,136 +192,57 @@ const DashboardPage = () => {
             <GoDotFill className='catperformdoticon' />
             Category Performance
           </h2>
-          <p>Revenue and listings by category</p>
+          <p>Listings by category</p>
         </div>
         <div className='catperfomancerow'>
-          <div className='catperformer' onClick={() => navigate('/products')}>
-            <div className='catperformerrow'>
-              <div className='catperformerleft'>
-                <h2 className='catperformerlefttitle'>Real Estate</h2>
-                <p className='catperformerleftnote'>3,847 listings</p>
+          {categoryEntries.slice(0, 4).map(([key, label], i) => (
+            <div className='catperformer' key={key} onClick={() => navigate('/products')}>
+              <div className='catperformerrow'>
+                <div className='catperformerleft'>
+                  <h2 className='catperformerlefttitle'>{label}</h2>
+                  <p className='catperformerleftnote'>{fmt(stats.categoryCounts[key] || 0)} listings</p>
+                </div>
+                <div className={`catperformerright${catStyleIndex[i]}`}>
+                  {categoryIcons[key]}
+                </div>
               </div>
-              <div className='catperformerright'>
-                <FiHome />
-              </div>
-            </div>
-            <h3 className='catperformerprice'>₹1.6Cr</h3>
-            <div className='catperformerbottom'>
-              <p className='catperformertag'>100% of top</p>
-              <p className='catperformerdetails'>View Details →</p>
-            </div>
-          </div>
-          <div className='catperformer' onClick={() => navigate('/products')}>
-            <div className='catperformerrow'>
-              <div className='catperformerleft'>
-                <h2 className='catperformerlefttitle'>Cars</h2>
-                <p className='catperformerleftnote'>2,456 listings</p>
-              </div>
-              <div className='catperformerright1'>
-                <FaCarSide />
+              <div className='catperformerbottom'>
+                <p className={`catperformertag${catStyleIndex[i]}`}>{fmt(stats.categoryCounts[key] || 0)} products</p>
+                <p className='catperformerdetails'>View Details →</p>
               </div>
             </div>
-            <h3 className='catperformerprice1'>₹1.2Cr</h3>
-            <div className='catperformerbottom'>
-              <p className='catperformertag1'>63% of top</p>
-              <p className='catperformerdetails'>View Details →</p>
-            </div>
-          </div>
-          <div className='catperformer' onClick={() => navigate('/products')}>
-            <div className='catperformerrow'>
-              <div className='catperformerleft'>
-                <h2 className='catperformerlefttitle'>Furniture</h2>
-                <p className='catperformerleftnote'>1,623 listings</p>
-              </div>
-              <div className='catperformerright2'>
-                <RiSofaFill />
-              </div>
-            </div>
-            <h3 className='catperformerprice2'>₹54L</h3>
-            <div className='catperformerbottom'>
-              <p className='catperformertag2'>42% of top</p>
-              <p className='catperformerdetails'>View Details →</p>
-            </div>
-          </div>
-          <div className='catperformer' onClick={() => navigate('/products')}>
-            <div className='catperformerrow'>
-              <div className='catperformerleft'>
-                <h2 className='catperformerlefttitle'>Jewellery & Watches</h2>
-                <p className='catperformerleftnote'>1,892 listings</p>
-              </div>
-              <div className='catperformerright3'>
-                <FiWatch />
-              </div>
-            </div>
-            <h3 className='catperformerprice3'>₹98L</h3>
-            <div className='catperformerbottom'>
-              <p className='catperformertag3'>49% of top</p>
-              <p className='catperformerdetails'>View Details →</p>
-            </div>
-          </div>
+          ))}
         </div>
         <div className='catperfomancerow'>
-          <div className='catperformer' onClick={() => navigate('/products')}>
-            <div className='catperformerrow'>
-              <div className='catperformerleft'>
-                <h2 className='catperformerlefttitle'>Arts & Paintings</h2>
-                <p className='catperformerleftnote'>987 listings</p>
+          {categoryEntries.slice(4).map(([key, label], i) => (
+            <div className='catperformer' key={key} onClick={() => navigate('/products')}>
+              <div className='catperformerrow'>
+                <div className='catperformerleft'>
+                  <h2 className='catperformerlefttitle'>{label}</h2>
+                  <p className='catperformerleftnote'>{fmt(stats.categoryCounts[key] || 0)} listings</p>
+                </div>
+                <div className={`catperformerright${catStyleIndex[i + 4]}`}>
+                  {categoryIcons[key] || <BsThreeDots />}
+                </div>
               </div>
-              <div className='catperformerright4'>
-                <PiPaintBrushBold />
-              </div>
-            </div>
-            <h3 className='catperformerprice4'>₹67L</h3>
-            <div className='catperformerbottom'>
-              <p className='catperformertag4'>25% of top</p>
-              <p className='catperformerdetails'>View Details →</p>
-            </div>
-          </div>
-          <div className='catperformer' onClick={() => navigate('/products')}>
-            <div className='catperformerrow'>
-              <div className='catperformerleft'>
-                <h2 className='catperformerlefttitle'>Antiques</h2>
-                <p className='catperformerleftnote'>745 listings</p>
-              </div>
-              <div className='catperformerright5'>
-                <BsBank />
+              <div className='catperformerbottom'>
+                <p className={`catperformertag${catStyleIndex[i + 4]}`}>{fmt(stats.categoryCounts[key] || 0)} products</p>
+                <p className='catperformerdetails'>View Details →</p>
               </div>
             </div>
-            <h3 className='catperformerprice5'>₹45L</h3>
-            <div className='catperformerbottom'>
-              <p className='catperformertag5'>19% of top</p>
-              <p className='catperformerdetails'>View Details →</p>
-            </div>
-          </div>
-          <div className='catperformer' onClick={() => navigate('/products')}>
-            <div className='catperformerrow'>
-              <div className='catperformerleft'>
-                <h2 className='catperformerlefttitle'>Collectables</h2>
-                <p className='catperformerleftnote'>1,234 listings</p>
-              </div>
-              <div className='catperformerright6'>
-                <GoTrophy />
-              </div>
-            </div>
-            <h3 className='catperformerprice6'>₹72L</h3>
-            <div className='catperformerbottom'>
-              <p className='catperformertag6'>32% of top</p>
-              <p className='catperformerdetails'>View Details →</p>
-            </div>
-          </div>
+          ))}
           <div className='catperformer' onClick={() => navigate('/products')}>
             <div className='catperformerrow'>
               <div className='catperformerleft'>
                 <h2 className='catperformerlefttitle'>Others</h2>
-                <p className='catperformerleftnote'>856 listings</p>
+                <p className='catperformerleftnote'>—</p>
               </div>
               <div className='catperformerright7'>
                 <BsThreeDots />
               </div>
             </div>
-            <h3 className='catperformerprice7'>₹38L</h3>
             <div className='catperformerbottom'>
-              <p className='catperformertag7'>22% of top</p>
+              <p className='catperformertag7'>—</p>
               <p className='catperformerdetails'>View Details →</p>
             </div>
           </div>
@@ -250,11 +267,8 @@ const DashboardPage = () => {
               </p>
               <p className='dashactivitytag'>Pending</p>
             </div>
-            <h2 className='dashactivitynum'>24</h2>
+            <h2 className='dashactivitynum'>{fmt(stats.pendingApprovals)}</h2>
             <p className='dashactivitynote'>Product Approvals</p>
-            <p className='dashactivityendnotes'>
-              8 Marketplace • 10 Buy Now • 6 Auctions
-            </p>
           </div>
           <div
             className='dashactivitycont1'
@@ -266,11 +280,8 @@ const DashboardPage = () => {
               </p>
               <p className='dashactivitytag1'>Live</p>
             </div>
-            <h2 className='dashactivitynum'>12</h2>
+            <h2 className='dashactivitynum'>—</h2>
             <p className='dashactivitynote'>Active Ads</p>
-            <p className='dashactivityendnotes1'>
-              5 Home Top • 4 Home Bottom • 3 Product
-            </p>
           </div>
           <div
             className='dashactivitycont2'
@@ -282,11 +293,8 @@ const DashboardPage = () => {
               </p>
               <p className='dashactivitytag2'>Featured</p>
             </div>
-            <h2 className='dashactivitynum'>45</h2>
+            <h2 className='dashactivitynum'>{fmt(stats.featuredCount)}</h2>
             <p className='dashactivitynote'>Featured Products</p>
-            <p className='dashactivityendnotes2'>
-              Premium listings across all modes
-            </p>
           </div>
           <div
             className='dashactivitycont3'
@@ -298,7 +306,7 @@ const DashboardPage = () => {
               </p>
               <p className='dashactivitytag3'>Active</p>
             </div>
-            <h2 className='dashactivitynum'>38</h2>
+            <h2 className='dashactivitynum'>{fmt(stats.recommendedCount)}</h2>
             <p className='dashactivitynote'>Recommended</p>
             <p className='dashactivityendnotes3'>Highlighted for users</p>
           </div>
@@ -385,7 +393,7 @@ const DashboardPage = () => {
               <IoCardOutline />
             </div>
             <div className='finservshortdetails'>
-              <h2>₹85.6L</h2>
+              <h2>—</h2>
               <p>Subscriptions</p>
             </div>
           </div>
@@ -397,7 +405,7 @@ const DashboardPage = () => {
               <VscPercentage />
             </div>
             <div className='finservshortdetails'>
-              <h2>₹12.4L</h2>
+              <h2>—</h2>
               <p>Coupon Discounts</p>
             </div>
           </div>
@@ -409,7 +417,7 @@ const DashboardPage = () => {
               <LuUsers />
             </div>
             <div className='finservshortdetails'>
-              <h2>₹25.9L</h2>
+              <h2>—</h2>
               <p>Lead Unlocks</p>
             </div>
           </div>
@@ -421,7 +429,7 @@ const DashboardPage = () => {
               <BsStars />
             </div>
             <div className='finservshortdetails'>
-              <h2>₹60L</h2>
+              <h2>—</h2>
               <p>Digital Media</p>
             </div>
           </div>
@@ -431,27 +439,27 @@ const DashboardPage = () => {
         <div className='lastdashinsight' onClick={() => navigate('/employees')}>
           <p className='lastdashinsighttitle'>Total Employees</p>
           <h2 className='lastdashinsightvalue'>
-            163 <LuAward className='lastdashicon' />
+            {fmt(stats.totalEmployees)} <LuAward className='lastdashicon' />
           </h2>
-          <p className='lastdashinsightnote'>Managing 5 business categories</p>
+          <p className='lastdashinsightnote'>Managing all business categories</p>
         </div>
         <div
           className='lastdashinsight1'
           onClick={() => navigate('/enquiries')}
         >
-          <p className='lastdashinsighttitle'>Pending Enquiries</p>
+          <p className='lastdashinsighttitle'>Active Enquiries</p>
           <h2 className='lastdashinsightvalue'>
-            31 <GoDotFill className='lastdashicon' />
+            {fmt(stats.activeLeads)} <GoDotFill className='lastdashicon' />
           </h2>
-          <p className='lastdashinsightnote'>Across all 5 modes</p>
+          <p className='lastdashinsightnote'>New + In Progress</p>
         </div>
         <div className='lastdashinsight2' onClick={() => navigate('/products')}>
           <p className='lastdashinsighttitle'>Active Auctions</p>
           <h2 className='lastdashinsightvalue'>
-            87 <TbActivityHeartbeat className='lastdashicon' />
+            {fmt(stats.auctionCount)} <TbActivityHeartbeat className='lastdashicon' />
           </h2>
           <p className='lastdashinsightnote1'>
-            <MdArrowOutward /> +12 new this week
+            Approved auction listings
           </p>
         </div>
       </div>

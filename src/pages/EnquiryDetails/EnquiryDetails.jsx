@@ -1,20 +1,74 @@
+import React, { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import "./EnquiryDetails.css";
 import { LuMessageSquare } from "react-icons/lu";
 import { CiCalendar } from "react-icons/ci";
 import { FiUser } from "react-icons/fi";
-import { RiTelegram2Line } from "react-icons/ri";
 import { MdOutlineEmail } from "react-icons/md";
 import { FiPhone } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { getEnquiry, updateEnquiry } from "../../lib/enquiries";
+import { getEmployees } from "../../lib/employees";
 
+const statusLabel = { NEW: "new", IN_PROGRESS: "in progress", RESOLVED: "resolved", CLOSED: "closed" };
+const listingTypeLabel = { BUY_NOW: "Buy Now", MARKETPLACE: "Marketplace", AUCTIONS: "Auctions", TO_LET: "To-Let" };
 
-
-
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" }) +
+    " " + d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+}
 
 export default function EnquiryDetails() {
-
     const navigate = useNavigate();
+    const { id } = useParams();
+    const [enquiry, setEnquiry] = useState(null);
+    const [employees, setEmployees] = useState([]);
+    const [status, setStatus] = useState("");
+    const [assignedEmployeeId, setAssignedEmployeeId] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
+
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const [enqRes, empRes] = await Promise.all([
+            getEnquiry(id),
+            getEmployees(),
+          ]);
+          const enq = enqRes.data || enqRes;
+          setEnquiry(enq);
+          setStatus(enq.status);
+          setAssignedEmployeeId(enq.assignedEmployeeId || "");
+          setEmployees(empRes.data || []);
+        } catch (err) {
+          console.error("Failed to fetch enquiry", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchData();
+    }, [id]);
+
+    const handleUpdate = async () => {
+      setUpdating(true);
+      try {
+        const payload = { status };
+        if (assignedEmployeeId !== (enquiry.assignedEmployeeId || "")) {
+          payload.assignedEmployeeId = assignedEmployeeId || null;
+        }
+        const res = await updateEnquiry(id, payload);
+        setEnquiry(res.data || res);
+      } catch (err) {
+        console.error("Failed to update enquiry", err);
+      } finally {
+        setUpdating(false);
+      }
+    };
+
+    if (loading) return <div className="enquirypagecontainer" style={{ padding: 40 }}>Loading...</div>;
+    if (!enquiry) return <div className="enquirypagecontainer" style={{ padding: 40 }}>Enquiry not found.</div>;
 
   return (
     <div className="enquirypagecontainer">
@@ -23,12 +77,12 @@ export default function EnquiryDetails() {
                 <button className="back-btn" onClick={() => navigate("/enquiries")}>
                     <FaArrowLeft />
                   </button>
-        
+
                 <div>
-                    <h1 className="enquirynameheader">Property Listing Enquiry</h1>
+                    <h1 className="enquirynameheader">{enquiry.product?.title || "Enquiry"}</h1>
                     <div className="lead-meta">
-                      <span className="badge">new</span>
-                      <span className="lead-id">Enquiry #1</span>
+                      <span className="badge">{statusLabel[enquiry.status] || enquiry.status}</span>
+                      <span className="lead-id">{listingTypeLabel[enquiry.product?.listingType] || ""}</span>
                     </div>
                 </div>
             </div>
@@ -38,36 +92,25 @@ export default function EnquiryDetails() {
                 <div className="originalenquiry">
                     <div className="originalenquiryheader">
                         <span className="originalenquirytitle"><LuMessageSquare className="originalenquiryicon"/>Original Enquiry</span>
-                        <p className="originalenquirydate"><CiCalendar />2024-01-28 10:30 AM</p>
+                        <p className="originalenquirydate"><CiCalendar />{formatDate(enquiry.createdAt)}</p>
                     </div>
                         <p className="originalenquirymessage">
-                            I'm interested in listing a luxury villa in Goa. Could you please provide more details about the Pro package and its benefits?
+                            {enquiry.message}
                         </p>
                 </div>
+                {enquiry.assignedEmployee && (
                 <div className="originalenquiry">
                     <div className="originalenquiryheader">
-                        <span className="originalenquirytitle"><LuMessageSquare className="conversationheadicon"/>Conversation Thread</span>
-                        <p className="originalenquirydate">Previous responses</p>
+                        <span className="originalenquirytitle"><LuMessageSquare className="conversationheadicon"/>Assigned Employee</span>
+                        <p className="originalenquirydate">{enquiry.assignedEmployee.designation || ""}</p>
                     </div>
                     <div className="originalenquirynote">
                         <div className="threadheader">
-                            <div className="threadheaderleft"><FiUser className="conversationicon" /> Admin </div>
-                            <p className="originalenquirydate"><CiCalendar />2024-01-28 02:15 PM</p>
+                            <div className="threadheaderleft"><FiUser className="conversationicon" /> {enquiry.assignedEmployee.name} </div>
                         </div>
-                        <p className="conversationmessage">
-                            I'm interested in listing a luxury villa in Goa. Could you please provide more details about the Pro package and its benefits?
-                        </p>
                     </div>
                 </div>
-                <div className="originalenquiry1">
-                    <div className="sendenquiryheader">
-                        <span className="originalenquirytitle"><RiTelegram2Line className="originalenquiryicon "/>Send Reply</span>
-                        <p className="originalenquirydate">Respond to this enquiry</p>
-                    </div>
-                    <h2 className="sendenquirytitle">Your Response</h2>
-                    <input className="enquiryplaceholder" type="text" placeholder="Type your response here..."/>
-                    <button className="sendreply"><RiTelegram2Line />Send Reply</button>
-                </div>
+                )}
             </div>
             <div className="enquirydetailsright">
                 <div className="enquirycontactinfo">
@@ -76,21 +119,21 @@ export default function EnquiryDetails() {
                         <div className="enquirycontacticon"><FiUser className="contactusericon" /></div>
                         <div className="enquirycontactdetails">
                             <h3 className="enquirycontacttitle">NAME</h3>
-                            <p className="enquirycontactvalue">Rahul Kapoor</p>
+                            <p className="enquirycontactvalue">{enquiry.visitorName}</p>
                         </div>
                     </div>
                     <div className="enquirycontactname">
                         <div className="enquirycontacticon"><MdOutlineEmail className="contactusericon1" /></div>
                         <div className="enquirycontactdetails">
                             <h3 className="enquirycontacttitle">EMAIL</h3>
-                            <p className="enquirycontactvalue">rahul@example.com</p>
+                            <p className="enquirycontactvalue">{enquiry.visitorEmail}</p>
                         </div>
                     </div>
                     <div className="enquirycontactname">
                         <div className="enquirycontacticon"><FiPhone  className="contactusericon2" /></div>
                         <div className="enquirycontactdetails">
                             <h3 className="enquirycontacttitle">PHONE</h3>
-                            <p className="enquirycontactvalue">+91 98765 43210</p>
+                            <p className="enquirycontactvalue">{enquiry.visitorPhone || "N/A"}</p>
                         </div>
                     </div>
                 </div>
@@ -99,34 +142,30 @@ export default function EnquiryDetails() {
                     <span className="enquirystatustitle">Enquiry Status</span>
                     <p className="originalenquirydate">Update Status</p></div>
                     <h2 className="currentstatustitle">Current Status</h2>
-                    <select className="currentstatusdropdown">
-                        <option>New</option>
-                        <option>In Progress</option>
-                        <option>Resolved</option>
-                        <option>Closed</option>
+                    <select className="currentstatusdropdown" value={status} onChange={(e) => setStatus(e.target.value)}>
+                        <option value="NEW">New</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="RESOLVED">Resolved</option>
+                        <option value="CLOSED">Closed</option>
                     </select>
-                    <p className="updatestatus">Update Status</p>
+                    <p className="updatestatus" style={{ cursor: "pointer" }} onClick={handleUpdate}>
+                      {updating ? "Updating..." : "Update Status"}
+                    </p>
                 </div>
-                <div className="enquirycontactinfo">
-                    <div className="enquirycontactheader">Enquiry Details</div>
-                    <div className="enquirycontactname1">
-                        <div className="enquirycontactdetails">
-                            <h3 className="enquirycontacttitle1">NAME</h3>
-                            <p className="enquirycontactvalue">Rahul Kapoor</p>
-                        </div>
-                    </div>
-                    <div className="enquirycontactname2">
-                        <div className="enquirycontactdetails">
-                            <h3 className="enquirycontacttitle2">EMAIL</h3>
-                            <p className="enquirycontactvalue">rahul@example.com</p>
-                        </div>
-                    </div>
-                    <div className="enquirycontactname3">
-                        <div className="enquirycontactdetails">
-                            <h3 className="enquirycontacttitle3">PHONE</h3>
-                            <p className="enquirycontactvalue">+91 98765 43210</p>
-                        </div>
-                    </div>
+                <div className="enquirystatusinfo">
+                    <div className="enquirystatusheader">
+                    <span className="enquirystatustitle">Assign Employee</span>
+                    <p className="originalenquirydate">Select an employee</p></div>
+                    <h2 className="currentstatustitle">Employee</h2>
+                    <select className="currentstatusdropdown" value={assignedEmployeeId} onChange={(e) => setAssignedEmployeeId(e.target.value)}>
+                        <option value="">Unassigned</option>
+                        {employees.filter(emp => emp.isActive).map((emp) => (
+                          <option key={emp.id} value={emp.id}>{emp.name}{emp.designation ? ` — ${emp.designation}` : ""}</option>
+                        ))}
+                    </select>
+                    <p className="updatestatus" style={{ cursor: "pointer" }} onClick={handleUpdate}>
+                      {updating ? "Updating..." : "Assign"}
+                    </p>
                 </div>
             </div>
         </div>
