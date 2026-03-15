@@ -202,6 +202,11 @@ const ProductPage = () => {
                 {TIER_LABELS[product.tier] || product.tier}
               </span>
             )}
+            {product.country && (
+              <span className="productheaddesc1">
+                {product.country}
+              </span>
+            )}
           </div>
           <button
             className="addproduct"

@@ -263,6 +263,7 @@ const ProductEdit = () => {
   const [socialMediaLink, setSocialMediaLink] = useState("");
   const [status, setStatus] = useState("ACTIVE");
   const [tier, setTier] = useState("GENERAL");
+  const [country, setCountry] = useState("INDIA");
   const [approvalStatus, setApprovalStatus] = useState("PENDING");
 
   // mode / tab
@@ -298,6 +299,7 @@ const ProductEdit = () => {
         setDescription(p.description || "");
         setValue(p.value != null ? String(p.value) : "");
         setTier(p.tier || "GENERAL");
+        setCountry(p.country || "INDIA");
         setApprovalStatus(p.approvalStatus || "PENDING");
 
         const m = p.meta && typeof p.meta === "object" ? { ...p.meta } : {};
@@ -394,6 +396,7 @@ const ProductEdit = () => {
         listingType: modeToListingType[mode],
         category: categoryVal,
         tier,
+        country,
         value: value.trim() ? parseInt(value, 10) : null,
         approvalStatus,
         meta: finalMeta,
@@ -610,6 +613,27 @@ const ProductEdit = () => {
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
+          </div>
+          <div className="basicinfoinputdiv">
+            <div className="basicinfotitle">Country</div>
+            <select
+              className="basicinfoinput1"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            >
+              <option value="INDIA">India</option>
+              <option value="UNITED STATES">United States</option>
+              <option value="UNITED KINGDOM">United Kingdom</option>
+              <option value="CANADA">Canada</option>
+              <option value="AUSTRALIA">Australia</option>
+              <option value="SINGAPORE">Singapore</option>
+              <option value="DUBAI">Dubai</option>
+              <option value="MALAYSIA">Malaysia</option>
+              <option value="QATAR">Qatar</option>
+              <option value="SAUDI ARABIA">Saudi Arabia</option>
+              <option value="SWITZERLAND">Switzerland</option>
+              <option value="KUWAIT">Kuwait</option>
+            </select>
           </div>
           <div className="basicinfoinputdiv">
             <div className="basicinfotitle">Social Media Link</div>

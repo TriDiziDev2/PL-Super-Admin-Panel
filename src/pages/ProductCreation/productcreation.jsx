@@ -39,6 +39,7 @@ const ProductCreation = () => {
   const marketplaceValueRef = useRef(null);
   const marketplaceStatusRef = useRef(null);
   const marketplaceTierRef = useRef(null);
+  const marketplaceCountryRef = useRef(null);
   const [propertyType, setPropertyType] = useState("");
   const [ItemType, setItemType] = useState("");
   const [selectedMarketplaceFiles, setSelectedMarketplaceFiles] = useState([]);
@@ -175,6 +176,7 @@ const ProductCreation = () => {
         if (element === marketplaceValueRef.current) continue;
         if (element === marketplaceStatusRef.current) continue;
         if (element === marketplaceTierRef.current) continue;
+        if (element === marketplaceCountryRef.current) continue;
         if (element.type === "file") continue;
         if (!element.value?.trim()) continue;
 
@@ -274,6 +276,7 @@ const ProductCreation = () => {
       const rawValue = resolveRawValue(formRoot);
       const status = marketplaceStatusRef.current?.value || "ACTIVE";
       const tier = marketplaceTierRef.current?.value || "GENERAL";
+      const country = marketplaceCountryRef.current?.value || "INDIA";
       const category = listingMode === "tolet" ? "REAL_ESTATE" : categoryByTab[activeTab];
       const parsedValue = rawValue
         ? Number.parseInt(rawValue.replace(/[^0-9]/g, ""), 10)
@@ -303,6 +306,7 @@ const ProductCreation = () => {
           listingType,
           category,
           tier,
+          country,
           approveNow: status === "ACTIVE",
           value: parsedValue,
           meta: JSON.stringify(collectMarketplaceMeta()),
@@ -628,6 +632,23 @@ const ProductCreation = () => {
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>City</h3>
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Country</h3>
+                <select ref={marketplaceCountryRef} defaultValue="INDIA" className="basicinfoinput1">
+                    <option value="INDIA">India</option>
+                    <option value="UNITED STATES">United States</option>
+                    <option value="UNITED KINGDOM">United Kingdom</option>
+                    <option value="CANADA">Canada</option>
+                    <option value="AUSTRALIA">Australia</option>
+                    <option value="SINGAPORE">Singapore</option>
+                    <option value="DUBAI">Dubai</option>
+                    <option value="MALAYSIA">Malaysia</option>
+                    <option value="QATAR">Qatar</option>
+                    <option value="SAUDI ARABIA">Saudi Arabia</option>
+                    <option value="SWITZERLAND">Switzerland</option>
+                    <option value="KUWAIT">Kuwait</option>
+                </select>
             </div>
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Social Media Link</h3>
@@ -2101,6 +2122,23 @@ const ProductCreation = () => {
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
             </div>
             <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Country</h3>
+                <select ref={marketplaceCountryRef} defaultValue="INDIA" className="basicinfoinput1">
+                    <option value="INDIA">India</option>
+                    <option value="UNITED STATES">United States</option>
+                    <option value="UNITED KINGDOM">United Kingdom</option>
+                    <option value="CANADA">Canada</option>
+                    <option value="AUSTRALIA">Australia</option>
+                    <option value="SINGAPORE">Singapore</option>
+                    <option value="DUBAI">Dubai</option>
+                    <option value="MALAYSIA">Malaysia</option>
+                    <option value="QATAR">Qatar</option>
+                    <option value="SAUDI ARABIA">Saudi Arabia</option>
+                    <option value="SWITZERLAND">Switzerland</option>
+                    <option value="KUWAIT">Kuwait</option>
+                </select>
+            </div>
+            <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Social Media Link</h3>
                 <input type="text" placeholder="Youtube, Instagram url" className="basicinfoinput1" />
             </div>
@@ -3544,6 +3582,23 @@ const ProductCreation = () => {
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>City</h3>
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Country</h3>
+                <select ref={marketplaceCountryRef} defaultValue="INDIA" className="basicinfoinput1">
+                    <option value="INDIA">India</option>
+                    <option value="UNITED STATES">United States</option>
+                    <option value="UNITED KINGDOM">United Kingdom</option>
+                    <option value="CANADA">Canada</option>
+                    <option value="AUSTRALIA">Australia</option>
+                    <option value="SINGAPORE">Singapore</option>
+                    <option value="DUBAI">Dubai</option>
+                    <option value="MALAYSIA">Malaysia</option>
+                    <option value="QATAR">Qatar</option>
+                    <option value="SAUDI ARABIA">Saudi Arabia</option>
+                    <option value="SWITZERLAND">Switzerland</option>
+                    <option value="KUWAIT">Kuwait</option>
+                </select>
             </div>
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Social Media Link</h3>
@@ -4991,6 +5046,23 @@ const ProductCreation = () => {
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>City</h3>
                 <input type="text" placeholder="Enter City" className="basicinfoinput1" />
+            </div>
+            <div className='basicinfoinputdiv'>
+                <h3 className='basicinfotitle'>Country</h3>
+                <select ref={marketplaceCountryRef} defaultValue="INDIA" className="basicinfoinput1">
+                    <option value="INDIA">India</option>
+                    <option value="UNITED STATES">United States</option>
+                    <option value="UNITED KINGDOM">United Kingdom</option>
+                    <option value="CANADA">Canada</option>
+                    <option value="AUSTRALIA">Australia</option>
+                    <option value="SINGAPORE">Singapore</option>
+                    <option value="DUBAI">Dubai</option>
+                    <option value="MALAYSIA">Malaysia</option>
+                    <option value="QATAR">Qatar</option>
+                    <option value="SAUDI ARABIA">Saudi Arabia</option>
+                    <option value="SWITZERLAND">Switzerland</option>
+                    <option value="KUWAIT">Kuwait</option>
+                </select>
             </div>
             <div className='basicinfoinputdiv'>
                 <h3 className='basicinfotitle'>Social Media Link</h3>
