@@ -2,6 +2,7 @@ import './Sidebar.css';
 
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { getUserType, clearAuth } from '../../lib/auth';
 
 import companyLogo from '../../assets/company-logo.png';
 
@@ -73,8 +74,21 @@ const linksData = [
   },
 ];
 
+const EMPLOYEE_HIDDEN_LINKS = ['Employees', 'Financials'];
+
 const Sidebar = () => {
   const [activeLink, setActiveLink] = useState('');
+  const userType = getUserType();
+  const isEmployee = userType === 'employee';
+
+  const visibleLinks = isEmployee
+    ? linksData.filter((item) => !EMPLOYEE_HIDDEN_LINKS.includes(item.title))
+    : linksData;
+
+  const handleLogout = () => {
+    clearAuth();
+    window.location.href = '/login';
+  };
 
   return (
     <div className='sidebar-container'>
@@ -86,7 +100,7 @@ const Sidebar = () => {
         />
       </div>
       <div className='sidebar-links-container'>
-        {linksData.map((item) => {
+        {visibleLinks.map((item) => {
           const { id, icon, title, link } = item;
           return (
             <Link to={link}>
@@ -107,15 +121,14 @@ const Sidebar = () => {
       </div>
       <div className='sidebar-admin-logout-container'>
         <div className='admin-container'>
-          <div className='admin-icon-container'>SA</div>
+          <div className='admin-icon-container'>{isEmployee ? 'EM' : 'SA'}</div>
           <div className='admin-content-container'>
-            <p className='admin-title'>Super Admin</p>
-            <p className='admin-mail'>admin@billionaire.com</p>
+            <p className='admin-title'>{isEmployee ? 'Employee' : 'Super Admin'}</p>
           </div>
           <div className='admin-online-container'></div>
         </div>
       </div>
-      <div className='logout-container'>
+      <div className='logout-container' onClick={handleLogout} style={{ cursor: 'pointer' }}>
         <MdLogout className='logout-icon' /> Logout
       </div>
     </div>

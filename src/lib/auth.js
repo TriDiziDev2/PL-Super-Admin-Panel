@@ -22,3 +22,7 @@ export function clearAuth() {
 export function isAuthenticated() {
   return Boolean(getToken());
 }
+
+export function isAdmin() {
+  return getUserType() === "admin";
+}

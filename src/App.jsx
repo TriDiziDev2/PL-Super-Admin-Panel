@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { getToken } from "./lib/auth";
+import { getToken, isAdmin } from "./lib/auth";
 import LandingPage from './pages/LandingPage/LandingPage';
 import Login from './pages/Login/Login';
 import DashboardPage from './pages/Dashboard/Dashboard';
@@ -38,8 +38,8 @@ const App = () => {
           <Route path='users' element={<Users />} />
           <Route path='activity' element={<Activity />} />
           <Route path='leads' element={<Leads />} />
-          <Route path='employees' element={<Employees />} />
-          <Route path='financials' element={<Financials />} />
+          <Route path='employees' element={isAdmin() ? <Employees /> : <Navigate to="/dashboard" replace />} />
+          <Route path='financials' element={isAdmin() ? <Financials /> : <Navigate to="/dashboard" replace />} />
           <Route path='enquiries' element={<Enquiries />} />
           <Route path='settings' element={<Settings />} />
           <Route path='productcreation' element={<ProductCreation/>} />
@@ -50,8 +50,8 @@ const App = () => {
           <Route path="userprofile/:id" element={<UserProfile />} />
           <Route path='leaddetails' element={ <LeadDetails /> } />
           <Route path="/addlead" element={<AddLead />} />
-          <Route path="/employeedetails/:id" element={<EmployeeDetails />} />
-          <Route path="/createemployee" element={<CreateEmployee />} />
+          <Route path="/employeedetails/:id" element={isAdmin() ? <EmployeeDetails /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/createemployee" element={isAdmin() ? <CreateEmployee /> : <Navigate to="/dashboard" replace />} />
           <Route path="/enquirydetails/:id" element={<EnquiryDetails />} />
 
         </Route>

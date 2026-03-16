@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./Financials.css";
 import {
   FiCalendar,
@@ -8,29 +8,138 @@ import {
   FiCopy,
   FiCheck,
   FiX,
-  FiStar
 } from "react-icons/fi";
 import { RiCoupon3Line } from "react-icons/ri";
 import { MdCurrencyRupee } from "react-icons/md";
 import { LuUsers } from "react-icons/lu";
 import { CiCalendar } from "react-icons/ci";
 import { LuTarget } from "react-icons/lu";
-import { useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import CouponCreation from "../../components/CouponCreation/CouponCreation";
+import {
+  getRevenueStats,
+  getCoupons,
+  getCouponStats,
+  deleteCoupon as deleteCouponApi,
+  getPackages,
+} from "../../lib/financials";
 
+const PERIOD_MAP = {
+  Today: "today",
+  "This Week": "this_week",
+  "Last Week": "last_week",
+  "This Month": "this_month",
+  "Last Month": "last_month",
+  "This Quarter": "this_quarter",
+};
 
+const TAB_CATEGORY_MAP = {
+  subscriptionplans: "SUBSCRIPTION_PLAN",
+  bannerads: "BANNER_AD",
+  featuredlistings: "FEATURED_LISTING",
+  leadunlocks: "LEAD_UNLOCK",
+  digitalmedia: "DIGITAL_MEDIA",
+};
 
-
-
-
-
+function formatCurrency(paise) {
+  const rupees = paise / 100;
+  if (rupees >= 100000) return `₹${(rupees / 100000).toFixed(2)}L`;
+  if (rupees >= 1000) return `₹${rupees.toLocaleString("en-IN")}`;
+  return `₹${rupees}`;
+}
 
 export default function FinancialDashboard() {
-
   const [showModal, setShowModal] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [activeTab, setActiveTab] = useState("subscriptionplans");
+  const [period, setPeriod] = useState("today");
 
-  const [activeTab, setActiveTab] = useState("approvals");
+  // Data states
+  const [revenue, setRevenue] = useState(null);
+  const [coupons, setCoupons] = useState([]);
+  const [couponStats, setCouponStats] = useState(null);
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchRevenue = async (p) => {
+    try {
+      const res = await getRevenueStats(p);
+      setRevenue(res.data);
+    } catch (err) {
+      console.error("Failed to fetch revenue:", err);
+    }
+  };
+
+  const fetchCoupons = async () => {
+    try {
+      const [couponsRes, statsRes] = await Promise.all([
+        getCoupons(),
+        getCouponStats(),
+      ]);
+      setCoupons(couponsRes.data);
+      setCouponStats(statsRes.data);
+    } catch (err) {
+      console.error("Failed to fetch coupons:", err);
+    }
+  };
+
+  const fetchPackages = async (category) => {
+    try {
+      const res = await getPackages(category);
+      setPackages(res.data);
+    } catch (err) {
+      console.error("Failed to fetch packages:", err);
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchRevenue(period),
+        fetchCoupons(),
+        fetchPackages(TAB_CATEGORY_MAP[activeTab]),
+      ]);
+      setLoading(false);
+    };
+    init();
+  }, []);
+
+  useEffect(() => {
+    fetchRevenue(period);
+  }, [period]);
+
+  useEffect(() => {
+    fetchPackages(TAB_CATEGORY_MAP[activeTab]);
+  }, [activeTab]);
+
+  const handleDeleteCoupon = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this coupon?")) return;
+    try {
+      await deleteCouponApi(id);
+      fetchCoupons();
+    } catch (err) {
+      console.error("Failed to delete coupon:", err);
+    }
+  };
+
+  const handleEditCoupon = (coupon) => {
+    setEditingCoupon(coupon);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingCoupon(null);
+  };
+
+  const handleCouponSaved = () => {
+    handleCloseModal();
+    fetchCoupons();
+  };
+
+  const isCouponActive = (coupon) =>
+    coupon.isActive && new Date(coupon.validTo) >= new Date();
 
   return (
     <div className="finance-page">
@@ -40,127 +149,143 @@ export default function FinancialDashboard() {
           <p>Manage pricing, monitor revenue & track financial performance</p>
         </div>
 
-          <select className="today-btn" ><FiCalendar /> Today
-          <option>Today</option>
-          <option>This Week</option>
-          <option>Last Week</option>
-          <option>This Month</option>
-          <option>Last Month</option>
-          <option>This Quarter</option>
-          <option>Custom Range</option>
-          </select>
-
+        <select
+          className="today-btn"
+          value={period}
+          onChange={(e) => setPeriod(e.target.value)}
+        >
+          {Object.entries(PERIOD_MAP).map(([label, value]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="Total Revenue" value="₹5.47L" growth="+6.3%" />
-        <StatCard title="Total Sales" value="184" growth="+9.2%" />
-        <StatCard title="Avg Transaction" value="₹2,972" />
-        <StatCard title="Monthly Recurring" value="₹28.45L" highlight />
+        <StatCard
+          title="Total Revenue"
+          value={revenue ? formatCurrency(revenue.totalRevenue) : "..."}
+        />
+        <StatCard
+          title="Total Sales"
+          value={revenue ? String(revenue.totalSales) : "..."}
+        />
+        <StatCard
+          title="Avg Transaction"
+          value={revenue ? formatCurrency(revenue.avgTransaction) : "..."}
+        />
+        <StatCard
+          title="Monthly Recurring"
+          value={revenue ? formatCurrency(revenue.monthlyRecurring) : "..."}
+          highlight
+        />
       </div>
 
       <div className="coupon-wrapper">
-
         <div className="coupon-header">
           <div>
-            <h3> <RiCoupon3Line className="couponicon" />Coupon Management</h3>
+            <h3>
+              <RiCoupon3Line className="couponicon" />
+              Coupon Management
+            </h3>
             <p>Create and manage discount coupons for packages</p>
           </div>
-          <button className="create-btn" onClick={() => setShowModal(true)} >
+          <button
+            className="create-btn"
+            onClick={() => {
+              setEditingCoupon(null);
+              setShowModal(true);
+            }}
+          >
             <FiPlus /> Create Coupon
           </button>
-          {showModal && (<CouponCreation onClose={() => setShowModal(false)} />)}
+          {showModal && (
+            <CouponCreation
+              onClose={handleCloseModal}
+              onSaved={handleCouponSaved}
+              coupon={editingCoupon}
+            />
+          )}
         </div>
 
         <div className="coupon-grid">
-
-          <CouponCard active code="ELITE25" discount="25% OFF" />
-          <CouponCard active code="NEWUSER2K" discount="₹2,000 OFF" />
-          <CouponCard active code="DIWALI50" discount="50% OFF" />
-          <CouponCard expired code="NEWYEAR30" discount="30% OFF" />
-          <CouponStats />
-
+          {coupons.map((coupon) => (
+            <CouponCard
+              key={coupon.id}
+              coupon={coupon}
+              active={isCouponActive(coupon)}
+              onEdit={() => handleEditCoupon(coupon)}
+              onDelete={() => handleDeleteCoupon(coupon.id)}
+            />
+          ))}
+          <CouponStatsCard stats={couponStats} />
         </div>
       </div>
-      <ul className='activitycat2'>
-        <li className={`catmenu5 ${activeTab === "subscriptionplans" ? "active-subscriptionplans" : ""}`}onClick={() => setActiveTab("subscriptionplans")}>Subscription Plans</li>
-        <li className={`catmenu5 ${activeTab === "bannerads" ? "active-bannerads" : ""}`}onClick={() => setActiveTab("bannerads")}>Banner Ads</li>
-        <li className={`catmenu5 ${activeTab === "featuredlistings" ? "active-featuredlistings" : ""}`}onClick={() => setActiveTab("featuredlistings")}>Featured Listings</li>
-        <li className={`catmenu5 ${activeTab === "leadunlocks" ? "active-leadunlocks" : ""}`}onClick={() => setActiveTab("leadunlocks")}>Lead Unlocks</li>
-        <li className={`catmenu5 ${activeTab === "digitalmedia" ? "active-digitalmedia" : ""}`}onClick={() => setActiveTab("digitalmedia")}>Digital Media</li>
+
+      <ul className="activitycat2">
+        <li
+          className={`catmenu5 ${activeTab === "subscriptionplans" ? "active-subscriptionplans" : ""}`}
+          onClick={() => setActiveTab("subscriptionplans")}
+        >
+          Subscription Plans
+        </li>
+        <li
+          className={`catmenu5 ${activeTab === "bannerads" ? "active-bannerads" : ""}`}
+          onClick={() => setActiveTab("bannerads")}
+        >
+          Banner Ads
+        </li>
+        <li
+          className={`catmenu5 ${activeTab === "featuredlistings" ? "active-featuredlistings" : ""}`}
+          onClick={() => setActiveTab("featuredlistings")}
+        >
+          Featured Listings
+        </li>
+        <li
+          className={`catmenu5 ${activeTab === "leadunlocks" ? "active-leadunlocks" : ""}`}
+          onClick={() => setActiveTab("leadunlocks")}
+        >
+          Lead Unlocks
+        </li>
+        <li
+          className={`catmenu5 ${activeTab === "digitalmedia" ? "active-digitalmedia" : ""}`}
+          onClick={() => setActiveTab("digitalmedia")}
+        >
+          Digital Media
+        </li>
       </ul>
 
-      {activeTab === "subscriptionplans" && (<div>
-        <div className="subscription-wrapper">
-
+      <div className="subscription-wrapper">
         <div className="subscription-header">
-          <h3>Subscription Plans</h3>
-          <button className="add-plan-btn">+ Add Plan</button>
+          <h3>
+            {activeTab === "subscriptionplans" && "Subscription Plans"}
+            {activeTab === "bannerads" && "Banner Ads"}
+            {activeTab === "featuredlistings" && "Featured Listings"}
+            {activeTab === "leadunlocks" && "Lead Unlocks"}
+            {activeTab === "digitalmedia" && "Digital Media"}
+          </h3>
         </div>
 
-        <div className="plans-grid">
-          <PlanCard title="BASIC" price="₹ 0" />
-          <PlanCard title="PREMIUM" price="₹ 2,499" popular />
-          <PlanCard title="RECOMMENDED" price="₹ 6,999" recommended />
-          <PlanCard title="ENTERPRISE" price="₹ 14,999" ultimate />
+        <div className={packages.length <= 3 ? "plans-grid1" : "plans-grid"}>
+          {packages.length === 0 && !loading && (
+            <p style={{ color: "#888", padding: "1rem" }}>
+              No packages found. Add one to get started.
+            </p>
+          )}
+          {packages.map((pkg) => (
+            <PlanCard
+              key={pkg.id}
+              title={pkg.title}
+              price={`₹ ${pkg.price.toLocaleString("en-IN")}`}
+              popular={pkg.tag === "POPULAR"}
+              recommended={pkg.tag === "RECOMMENDED"}
+              ultimate={pkg.tag === "ULTIMATE"}
+              features={pkg.features}
+            />
+          ))}
         </div>
       </div>
-      </div>)}
-      {activeTab === "bannerads" && (<div><div className="subscription-wrapper">
-
-        <div className="subscription-header">
-          <h3>Subscription Plans</h3>
-          <button className="add-plan-btn">+ Add Plan</button>
-        </div>
-
-        <div className="plans-grid1">
-          <PlanCard title="HomePage Banner" price="₹ 9,999" />
-          <PlanCard title="In Listings Banner" price="₹ 5,999" popular />
-          <PlanCard title="Pop-up Banner" price="₹ 8,999" recommended />
-        </div>
-      </div></div>)}
-      {activeTab === "featuredlistings" && (<div><div className="subscription-wrapper">
-
-        <div className="subscription-header">
-          <h3>Subscription Plans</h3>
-          <button className="add-plan-btn">+ Add Plan</button>
-        </div>
-
-        <div className="plans-grid1">
-          <PlanCard title="1 Week Package" price="₹ 2,500" />
-          <PlanCard title="2 Weeks Package" price="₹ 4,500" popular />
-          <PlanCard title="1 Month Package" price="₹ 7,999" recommended />
-        </div>
-      </div></div>)}
-      {activeTab === "leadunlocks" && (<div><div className="subscription-wrapper">
-
-        <div className="subscription-header">
-          <h3>Subscription Plans</h3>
-          <button className="add-plan-btn">+ Add Plan</button>
-        </div>
-
-        <div className="plans-grid">
-          <PlanCard title="BASIC" price="₹ 0" />
-          <PlanCard title="Extra Pack 1" price="₹ 299" popular />
-          <PlanCard title="Extra Pack 2" price="₹ 499" recommended />
-          <PlanCard title="Extra Pack 3" price="₹ 999" ultimate />
-        </div>
-      </div></div>)}
-      {activeTab === "digitalmedia" && (<div><div className="subscription-wrapper">
-
-        <div className="subscription-header">
-          <h3>Subscription Plans</h3>
-          <button className="add-plan-btn">+ Add Plan</button>
-        </div>
-
-        <div className="plans-grid1">
-          <PlanCard title="Digital Media" price="₹ 3,499" recommended  />
-
-        </div>
-      </div></div>)}
-
-      
-
     </div>
   );
 }
@@ -177,10 +302,20 @@ function StatCard({ title, value, growth, highlight }) {
   );
 }
 
+function CouponCard({ coupon, active, onEdit, onDelete }) {
+  const discount =
+    coupon.discountType === "PERCENTAGE"
+      ? `${coupon.discountValue}% OFF`
+      : `₹${coupon.discountValue.toLocaleString("en-IN")} OFF`;
 
-function CouponCard({ active, expired, code, discount }) {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(coupon.code);
+  };
+
   return (
-    <div className={`coupon-card ${active ? "active" : ""} ${expired ? "expired" : ""}`}>
+    <div
+      className={`coupon-card ${active ? "active" : ""} ${!active ? "expired" : ""}`}
+    >
       <div className="coupon-top">
         <span className={`status ${active ? "green" : "gray"}`}>
           {active ? "ACTIVE" : "EXPIRED"}
@@ -188,72 +323,112 @@ function CouponCard({ active, expired, code, discount }) {
         <span className="discount-tag">{discount}</span>
       </div>
 
-      <div className="coupon-code">
-        {code}
+      <div className="coupon-code" onClick={handleCopy} style={{ cursor: "pointer" }}>
+        {coupon.code}
         <FiCopy size={14} />
       </div>
 
       <ul className="coupon-details">
-        <li className="couponrow"> <MdCurrencyRupee className="couponicon1" /> Max Discount: ₹5,000</li>
-        <li className="couponrow"> <LuUsers className="couponicon1" /> Used: 147 / 500</li>
-        <li className="couponrow"><CiCalendar className="couponicon1" /> Valid till: 31 Mar 2026</li>
-        <li className="couponrow"><LuTarget className="couponicon1" />Applies to: Elite Plans</li>
+        {coupon.maxDiscount && (
+          <li className="couponrow">
+            <MdCurrencyRupee className="couponicon1" /> Max Discount: ₹
+            {coupon.maxDiscount.toLocaleString("en-IN")}
+          </li>
+        )}
+        <li className="couponrow">
+          <LuUsers className="couponicon1" /> Used: {coupon.usedCount}
+          {coupon.usageLimit > 0 ? ` / ${coupon.usageLimit}` : ""}
+        </li>
+        <li className="couponrow">
+          <CiCalendar className="couponicon1" /> Valid till:{" "}
+          {new Date(coupon.validTo).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </li>
+        <li className="couponrow">
+          <LuTarget className="couponicon1" />
+          Applies to: {coupon.appliesTo}
+        </li>
       </ul>
 
       <div className="coupon-actions">
         {active ? (
           <>
-            <button className="coupedit-btn" ><FiEdit2 /> Edit</button>
-            <button className="coupdelete-btn"><FiTrash2 /> Delete</button>
+            <button className="coupedit-btn" onClick={onEdit}>
+              <FiEdit2 /> Edit
+            </button>
+            <button className="coupdelete-btn" onClick={onDelete}>
+              <FiTrash2 /> Delete
+            </button>
           </>
         ) : (
-          <button className="archive-btn">Archive</button>
+          <button className="coupdelete-btn" onClick={onDelete}>
+            <FiTrash2 /> Delete
+          </button>
         )}
       </div>
     </div>
   );
 }
 
-function CouponStats() {
+function CouponStatsCard({ stats }) {
+  if (!stats) return null;
+
   return (
     <div className="coupon-stats">
       <h4>Coupon Statistics</h4>
 
       <div className="stat-line">
         <span>Active Coupons</span>
-        <b className="green-text">3</b>
+        <b className="green-text">{stats.activeCoupons}</b>
       </div>
       <div className="stat-line">
         <span>Expired Coupons</span>
-        <b>1</b>
+        <b>{stats.expiredCoupons}</b>
       </div>
       <div className="stat-line">
         <span>Total Uses</span>
-        <b className="blue-text2">926</b>
+        <b className="blue-text2">{stats.totalUses}</b>
       </div>
       <div className="stat-line">
         <span>Total Discount Given</span>
-        <b className="gold-text">₹4.2L</b>
+        <b className="gold-text">
+          ₹{stats.totalDiscountGiven.toLocaleString("en-IN")}
+        </b>
       </div>
     </div>
   );
 }
 
-function PlanCard({ title, price, popular, recommended, ultimate }) {
+function PlanCard({ title, price, popular, recommended, ultimate, features }) {
   return (
-    <div className={`plan-card ${popular ? "popular" : ""} ${recommended ? "recommended" : ""} ${ultimate ? "ultimate" : ""}`}>
+    <div
+      className={`plan-card ${popular ? "popular" : ""} ${recommended ? "recommended" : ""} ${ultimate ? "ultimate" : ""}`}
+    >
       {popular && <span className="plan-tag blue">POPULAR</span>}
       {recommended && <span className="plan-tag yellow">RECOMMENDED</span>}
       {ultimate && <span className="plan-tag dark">ULTIMATE</span>}
-      <p className="planediticon"><FaRegEdit /></p>
+      <p className="planediticon">
+        <FaRegEdit />
+      </p>
       <h4>{title}</h4>
       <h2>{price}</h2>
       <p className="gst">+ GST per month</p>
 
       <ul>
-        <li><FiCheck className="noteicon"/> Unlimited till Sep 2026</li>
-        <li><FiCheck className="noteicon"/> 3/month after Mar 2027</li>
-        <li><FiX className="noteicon1"/> No Featured Listings</li>
+        {features && features.length > 0 ? (
+          features.map((f, i) => (
+            <li key={i}>
+              <FiCheck className="noteicon" /> {f}
+            </li>
+          ))
+        ) : (
+          <li>
+            <FiCheck className="noteicon" /> Standard features included
+          </li>
+        )}
       </ul>
     </div>
   );

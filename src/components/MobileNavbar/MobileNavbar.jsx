@@ -17,6 +17,7 @@ import { GoPerson } from 'react-icons/go';
 import { LuDollarSign } from 'react-icons/lu';
 
 import { Link } from 'react-router-dom';
+import { getUserType } from '../../lib/auth';
 
 const linksData = [
   {
@@ -75,11 +76,18 @@ const linksData = [
   },
 ];
 
+const EMPLOYEE_HIDDEN_LINKS = ['Employees', 'Financials'];
+
 const MobileNavbar = () => {
   const [showLinks, setShowLinks] = useState(false);
   const [activeLink, setActiveLink] = useState(
     linksData[0].title.toLowerCase(),
   );
+  const isEmployee = getUserType() === 'employee';
+
+  const visibleLinks = isEmployee
+    ? linksData.filter((item) => !EMPLOYEE_HIDDEN_LINKS.includes(item.title))
+    : linksData;
 
   return (
     <div className='mobile-navbar-container'>
@@ -93,7 +101,7 @@ const MobileNavbar = () => {
           className='mobile-nav-links-container'
           onClick={() => setShowLinks(!showLinks)}
         >
-          {linksData.map((item) => {
+          {visibleLinks.map((item) => {
             const { id, icon, title, link } = item;
             return (
               <Link to={link}>
