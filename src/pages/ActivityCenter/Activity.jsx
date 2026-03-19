@@ -20,7 +20,7 @@ import { FaRegEye } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
 import {
   fetchPendingApprovals,
-  fetchFeaturedRecommended,
+  fetchAllApprovedProducts,
   approveProduct as apiApproveProduct,
   updateFeaturedRecommended as apiUpdateFeaturedRecommended,
 } from "../../lib/activity";
@@ -50,7 +50,7 @@ const Activitypage = () => {
         setLoading(true);
         setError("");
         try {
-            const [pRes, fRes] = await Promise.all([fetchPendingApprovals(), fetchFeaturedRecommended()]);
+            const [pRes, fRes] = await Promise.all([fetchPendingApprovals(), fetchAllApprovedProducts()]);
             setPendingProducts(pRes.data || []);
             setFeaturedProducts(fRes.data || []);
         } catch (err) {
@@ -87,7 +87,7 @@ const Activitypage = () => {
     };
 
     const pendingCount = pendingProducts.length;
-    const featuredCount = featuredProducts.length;
+    const featuredCount = featuredProducts.filter((p) => p.isFeatured || p.isRecommended).length;
     const featuredFiltered = !featuredSearch.trim()
         ? featuredProducts
         : featuredProducts.filter((p) => {
@@ -346,7 +346,7 @@ const Activitypage = () => {
             />
         </div>
         <span className="searchdesc">{loading ? "…" : `${featuredFiltered.length} products found`}</span>
-        {loading ? <p className='activityinfoicon'>Loading…</p> : featuredFiltered.length === 0 ? <p className='activityinfoicon'>No featured or recommended products</p> : featuredFiltered.map((product) => {
+        {loading ? <p className='activityinfoicon'>Loading…</p> : featuredFiltered.length === 0 ? <p className='activityinfoicon'>No products found</p> : featuredFiltered.map((product) => {
             const isMarketplace = product.listingType === "MARKETPLACE";
             const ListingIcon = product.listingType === "AUCTIONS" ? TbHammer : product.listingType === "BUY_NOW" ? BsLightningCharge : AiOutlineShop;
             return (

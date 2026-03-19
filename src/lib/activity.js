@@ -12,6 +12,12 @@ export async function fetchFeaturedRecommended() {
   return res.data;
 }
 
+/** @returns {Promise<{ data: Array }>} */
+export async function fetchAllApprovedProducts() {
+  const res = await api.get("/api/product", { params: { approvalStatus: "APPROVED" } });
+  return res.data;
+}
+
 /**
  * @param {string} id
  * @param {{ approvalStatus: string, tier?: string }} body

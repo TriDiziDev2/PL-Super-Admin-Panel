@@ -1,0 +1,21 @@
+import api from "./api";
+
+export async function getAdminProfile() {
+  const res = await api.get("/api/admin/me");
+  return res.data;
+}
+
+export async function updateAdminProfilePicture(key) {
+  const res = await api.patch("/api/admin/me/profile-picture", { key });
+  return res.data;
+}
+
+export async function removeAdminProfilePicture() {
+  const res = await api.delete("/api/admin/me/profile-picture");
+  return res.data;
+}
+
+export async function getPresignedUrl(key) {
+  const res = await api.get(`/api/media/presigned?key=${encodeURIComponent(key)}`);
+  return res.data;
+}

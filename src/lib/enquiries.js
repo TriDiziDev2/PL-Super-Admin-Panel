@@ -1,5 +1,10 @@
 import api from "./api";
 
+export const getNewsletterLeads = async (params = {}) => {
+  const response = await api.get("/api/newsletter", { params });
+  return response.data;
+};
+
 export const getEnquiry = async (id) => {
   const response = await api.get(`/api/enquiry/${id}`);
   return response.data;

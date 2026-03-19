@@ -181,36 +181,49 @@ const ProductCreation = () => {
       return nearestHeading;
     };
 
-    const collectMarketplaceMeta = () => {
-      const formRoot = marketplaceFormRef.current;
-      if (!formRoot) return {};
+    const CORE_PLACEHOLDERS = new Set([
+      marketplaceTitleRef,
+      marketplaceDescriptionRef,
+      marketplaceValueRef,
+      marketplaceStatusRef,
+      marketplaceTierRef,
+      marketplaceCountryRef,
+    ]);
 
-      const elements = Array.from(
-        formRoot.querySelectorAll("input, select, textarea"),
-      );
+    const collectMarketplaceMeta = (stateOverrides = {}) => {
+      const formRoot = marketplaceFormRef.current;
       const meta = {};
 
-      for (const element of elements) {
-        if (element === marketplaceTitleRef.current) continue;
-        if (element === marketplaceDescriptionRef.current) continue;
-        if (element === marketplaceValueRef.current) continue;
-        if (element === marketplaceStatusRef.current) continue;
-        if (element === marketplaceTierRef.current) continue;
-        if (element === marketplaceCountryRef.current) continue;
-        if (element.type === "file") continue;
-        if (!element.value?.trim()) continue;
+      if (formRoot) {
+        const elements = Array.from(
+          formRoot.querySelectorAll("input, select, textarea"),
+        );
 
-        const rawLabel = getFieldLabel(element) || element.placeholder || element.name;
-        if (!rawLabel) continue;
-        let key = normalizeMetaKey(rawLabel);
-        if (!key) continue;
+        for (const element of elements) {
+          if ([...CORE_PLACEHOLDERS].some((r) => r.current === element)) continue;
+          if (element.type === "file") continue;
+          if (!element.value?.trim()) continue;
 
-        if (meta[key] !== undefined) {
-          let suffix = 2;
-          while (meta[`${key}${suffix}`] !== undefined) suffix += 1;
-          key = `${key}${suffix}`;
+          const rawLabel = getFieldLabel(element) || element.placeholder || element.name;
+          if (!rawLabel) continue;
+          let key = normalizeMetaKey(rawLabel);
+          if (!key) continue;
+
+          if (meta[key] !== undefined) {
+            let suffix = 2;
+            while (meta[`${key}${suffix}`] !== undefined) suffix += 1;
+            key = `${key}${suffix}`;
+          }
+          meta[key] = element.value.trim();
         }
-        meta[key] = element.value.trim();
+      }
+
+      // Merge explicit state overrides — these guarantee controlled-select values
+      // and any state-driven fields are always present in meta.
+      for (const [k, v] of Object.entries(stateOverrides)) {
+        if (v !== undefined && v !== null && String(v).trim() !== "") {
+          meta[k] = String(v).trim();
+        }
       }
 
       return meta;
@@ -320,6 +333,10 @@ const ProductCreation = () => {
       try {
         setIsMarketplaceSubmitting(true);
 
+        const stateOverrides = {};
+        if (propertyType) stateOverrides.propertyType = propertyType;
+        if (ItemType) stateOverrides.itemType = ItemType;
+
         const createPayload = {
           title,
           description: description || undefined,
@@ -329,7 +346,7 @@ const ProductCreation = () => {
           country,
           approveNow: status === "ACTIVE",
           value: parsedValue,
-          meta: JSON.stringify(collectMarketplaceMeta()),
+          meta: JSON.stringify(collectMarketplaceMeta(stateOverrides)),
         };
 
         const createdProductResponse = await api.post("/api/product", createPayload);

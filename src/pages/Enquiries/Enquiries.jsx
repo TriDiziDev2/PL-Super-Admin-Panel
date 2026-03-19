@@ -11,8 +11,9 @@ import { useNavigate } from "react-router-dom";
 import { HiOutlineUserCircle } from "react-icons/hi";
 import { GoDotFill } from "react-icons/go";
 import { IoMdTime } from "react-icons/io";
-import { getEnquiries, getEnquiryStats, updateEnquiry } from "../../lib/enquiries";
+import { getEnquiries, getEnquiryStats, updateEnquiry, getNewsletterLeads } from "../../lib/enquiries";
 import { getEmployees } from "../../lib/employees";
+import { MdOutlineEmail } from "react-icons/md";
 
 const statusLabel = { NEW: "unread", IN_PROGRESS: "in progress", RESOLVED: "replied", CLOSED: "closed" };
 const listingTypeLabel = { BUY_NOW: "Buy Now", MARKETPLACE: "Marketplace", AUCTIONS: "Auctions", TO_LET: "To-Let" };
@@ -29,6 +30,7 @@ function timeAgo(dateStr) {
 
 export default function Enquiries() {
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState("enquiries");
   const [enquiries, setEnquiries] = useState([]);
   const [stats, setStats] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -36,6 +38,11 @@ export default function Enquiries() {
   const [searchInput, setSearchInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState([]);
+  const [newsletterLeads, setNewsletterLeads] = useState([]);
+  const [newsletterPagination, setNewsletterPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [newsletterSearch, setNewsletterSearch] = useState("");
+  const [newsletterSearchInput, setNewsletterSearchInput] = useState("");
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -65,6 +72,23 @@ export default function Enquiries() {
   useEffect(() => {
     getEmployees().then((res) => setEmployees((res.data || []).filter(e => e.isActive))).catch(() => {});
   }, []);
+
+  const fetchNewsletterLeads = useCallback(async () => {
+    setNewsletterLoading(true);
+    try {
+      const res = await getNewsletterLeads({ page: newsletterPagination.page, limit: 20, search: newsletterSearch });
+      setNewsletterLeads(res.data || []);
+      setNewsletterPagination(res.pagination || { page: 1, totalPages: 1, total: 0 });
+    } catch (err) {
+      console.error("Failed to fetch newsletter leads", err);
+    } finally {
+      setNewsletterLoading(false);
+    }
+  }, [newsletterPagination.page, newsletterSearch]);
+
+  useEffect(() => {
+    if (activeSection === "newsletter") fetchNewsletterLeads();
+  }, [activeSection, fetchNewsletterLeads]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -101,6 +125,59 @@ export default function Enquiries() {
         <p>Chat and form enquiries across all business modes</p>
       </div>
 
+      <ul className="activitycat1" style={{ marginBottom: "25px" }}>
+        <li className={`catmenu4 ${activeSection === "enquiries" ? "active-allenquiries" : ""}`} onClick={() => setActiveSection("enquiries")}>
+          <FiMessageSquare /> Enquiries
+        </li>
+        <li className={`catmenu4 ${activeSection === "newsletter" ? "active-allenquiries" : ""}`} onClick={() => setActiveSection("newsletter")}>
+          <MdOutlineEmail /> Newsletter Leads
+        </li>
+      </ul>
+
+      {activeSection === "newsletter" && (
+        <div>
+          <form className="search-box" onSubmit={(e) => { e.preventDefault(); setNewsletterSearch(newsletterSearchInput); setNewsletterPagination((p) => ({ ...p, page: 1 })); }}>
+            <FiSearch />
+            <input placeholder="Search by email..." value={newsletterSearchInput} onChange={(e) => setNewsletterSearchInput(e.target.value)} />
+          </form>
+          <p style={{ marginBottom: "12px", color: "#6b7280", fontSize: "13px" }}>{newsletterLoading ? "Loading…" : `${newsletterPagination.total} subscriber${newsletterPagination.total !== 1 ? "s" : ""}`}</p>
+          {newsletterLoading ? (
+            <p style={{ padding: "20px", textAlign: "center" }}>Loading…</p>
+          ) : newsletterLeads.length === 0 ? (
+            <p style={{ padding: "20px", textAlign: "center" }}>No newsletter subscribers found.</p>
+          ) : (
+            <div>
+              {newsletterLeads.map((lead) => (
+                <div className="enquiry-card" key={lead.id}>
+                  <div className="enquiry-header">
+                    <div className="user-info">
+                      <div className="avatar">{lead.email.slice(0, 2).toUpperCase()}</div>
+                      <div>
+                        <h4>{lead.email}</h4>
+                        <p style={{ fontSize: "12px", color: "#6b7280", margin: "4px 0 0 0" }}>Newsletter Subscriber</p>
+                      </div>
+                    </div>
+                    <span className={`status ${lead.isActive ? "" : "unread"}`} style={{ alignSelf: "center" }}>{lead.isActive ? "Active" : "Unsubscribed"}</span>
+                  </div>
+                  <div className="enquiry-footer">
+                    <span><FiClock /> {timeAgo(lead.createdAt)}</span>
+                    <span className="type">{lead.email}</span>
+                  </div>
+                </div>
+              ))}
+              {newsletterPagination.totalPages > 1 && (
+                <div style={{ display: "flex", justifyContent: "center", gap: "10px", padding: "20px" }}>
+                  <button disabled={newsletterPagination.page <= 1} onClick={() => setNewsletterPagination((p) => ({ ...p, page: p.page - 1 }))} className="reply-btn">Prev</button>
+                  <span style={{ alignSelf: "center" }}>Page {newsletterPagination.page} of {newsletterPagination.totalPages}</span>
+                  <button disabled={newsletterPagination.page >= newsletterPagination.totalPages} onClick={() => setNewsletterPagination((p) => ({ ...p, page: p.page + 1 }))} className="reply-btn">Next</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeSection === "enquiries" && (<>
       <div className="stats-row">
         <div className="stat-card">
           <div className="stat-top">
@@ -249,6 +326,7 @@ export default function Enquiries() {
           )}
         </div>
       )}
+      </>)}
     </div>
   );
 }
